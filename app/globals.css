@@ -1,0 +1,212 @@
+@import 'tailwindcss';
+
+/* Le thème sombre s'active via la classe .dark sur <html> (next-themes). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================================
+   Palette CSC — extraite du logo :
+     vert foncé  #1E7A1E   (lettres « C », texte « Agence de formation »)
+     vert vif    #4CAF1A   (flèche, chandeliers)
+     or          #F5C211   (lettre « S », « SANS »)
+     encre       #0F1A14   (« CRYPTO … COMPLEXE »)
+   Contrastes vérifiés WCAG AA (texte normal ≥ 4,5:1) :
+     clair  : primary/bg 5,6:1 · text/bg 17:1 · muted/bg 6,9:1 · accent-fg/accent 10:1
+     sombre : primary/bg 8,3:1 · text/bg 15:1 · muted/bg 7,7:1
+   L'or n'est JAMAIS utilisé comme couleur de texte sur fond clair (contraste
+   insuffisant) : uniquement en fond, avec texte foncé.
+   ========================================================================== */
+:root {
+  --bg: #ffffff;
+  --surface: #f4f8f2;
+  --surface-2: #e9f1e5;
+  --border: #d5e2d0;
+  --text: #0f1a14;
+  --muted: #4b5b50;
+
+  --primary: #1e7a1e;
+  --primary-hover: #176317;
+  --primary-fg: #ffffff;
+  --primary-soft: #e3f2dd;
+
+  --secondary: #4caf1a;
+  --secondary-fg: #0f1a14;
+
+  --accent: #f5c211;
+  --accent-hover: #e0b00c;
+  --accent-fg: #1a1500;
+  --accent-soft: #fdf3c8;
+
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --warning: #a14b06;
+  --warning-soft: #fef3c7;
+  --error: #b91c1c;
+  --error-soft: #fee2e2;
+  --info: #1d4ed8;
+  --info-soft: #dbeafe;
+
+  --ring: #1e7a1e;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0b120d;
+  --surface: #131d16;
+  --surface-2: #1b281f;
+  --border: #2a3a2e;
+  --text: #e7efe8;
+  --muted: #a3b5a7;
+
+  --primary: #4cc24a;
+  --primary-hover: #63d161;
+  --primary-fg: #06200a;
+  --primary-soft: #183a1b;
+
+  --secondary: #7ed957;
+  --secondary-fg: #06200a;
+
+  --accent: #ffcb2e;
+  --accent-hover: #ffd658;
+  --accent-fg: #1a1500;
+  --accent-soft: #3a3110;
+
+  --success: #4ade80;
+  --success-soft: #12331f;
+  --warning: #fbbf24;
+  --warning-soft: #3a2c0b;
+  --error: #f87171;
+  --error-soft: #3b1515;
+  --info: #93c5fd;
+  --info-soft: #172a45;
+
+  --ring: #4cc24a;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-fg: var(--secondary-fg);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-error: var(--error);
+  --color-error-soft: var(--error-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-ring: var(--ring);
+
+  /* Polices système : aucun téléchargement de police (connexions lentes). */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Composants de base réutilisables (classes légères, pas de JS).
+   ------------------------------------------------------------------------- */
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@utility link {
+  @apply font-medium text-primary underline-offset-2 hover:underline;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-fg hover:bg-primary-hover;
+  }
+  .btn-accent {
+    @apply btn bg-accent text-accent-fg hover:bg-accent-hover;
+  }
+  .btn-outline {
+    @apply btn border border-border bg-bg text-text hover:bg-surface-2;
+  }
+  .btn-ghost {
+    @apply btn text-text hover:bg-surface-2;
+  }
+  .btn-danger {
+    @apply btn bg-error text-white hover:opacity-90 dark:text-bg;
+  }
+
+  .card {
+    @apply rounded-xl border border-border bg-surface p-4 sm:p-6;
+  }
+
+  .input {
+    @apply block min-h-11 w-full rounded-lg border border-border bg-bg px-3 py-2 text-base text-text placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/30 aria-[invalid=true]:border-error;
+  }
+
+  .label {
+    @apply mb-1 block text-sm font-medium text-text;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .table-wrap {
+    @apply overflow-x-auto rounded-xl border border-border;
+  }
+  .table {
+    @apply w-full min-w-max text-left text-sm;
+  }
+  .table th {
+    @apply bg-surface-2 px-3 py-2 font-semibold text-muted;
+  }
+  .table td {
+    @apply border-t border-border px-3 py-2 align-top;
+  }
+
+  /* Rendu du Markdown simple (charte, descriptions). */
+  .prose-csc h2 {
+    @apply mt-6 mb-3 text-xl font-bold first:mt-0;
+  }
+  .prose-csc h3 {
+    @apply mt-5 mb-2 text-lg font-semibold;
+  }
+  .prose-csc p {
+    @apply mb-3 leading-relaxed;
+  }
+  .prose-csc ul {
+    @apply mb-3 list-disc space-y-1 pl-6;
+  }
+  .prose-csc ol {
+    @apply mb-3 list-decimal space-y-1 pl-6;
+  }
+  .prose-csc a {
+    @apply link;
+  }
+}
