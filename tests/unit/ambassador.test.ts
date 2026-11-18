@@ -54,7 +54,18 @@ describe('liens vidéo', () => {
     expect(v).toMatchObject({ provider: 'drive', embedUrl: 'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/preview' });
   });
 
+  it('TikTok (lien complet, format vertical)', () => {
+    const v = parseVideoUrl('https://www.tiktok.com/@csc.academy/video/7301234567890123456?lang=fr');
+    expect(v).toMatchObject({ provider: 'tiktok', embedUrl: 'https://www.tiktok.com/embed/v2/7301234567890123456', vertical: true });
+  });
+
+  it('Vimeo', () => {
+    expect(parseVideoUrl('https://vimeo.com/76979871')).toMatchObject({ provider: 'vimeo', embedUrl: 'https://player.vimeo.com/video/76979871' });
+  });
+
   it.each([
+    'https://vm.tiktok.com/ZMabc123/',
+    'https://www.tiktok.com/@csc/video/<script>',
     'http://youtu.be/dQw4w9WgXcQ',
     'https://evil.example/watch?v=dQw4w9WgXcQ',
     'https://youtube.com.evil.example/watch?v=dQw4w9WgXcQ',

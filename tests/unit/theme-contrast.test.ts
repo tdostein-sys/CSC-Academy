@@ -1,21 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
+import { tokens, type TokenName } from '@/@core/theme/tokens';
 
 /**
  * Vérifie automatiquement que les couleurs des thèmes clair et sombre
- * respectent le contraste WCAG AA (4,5:1 pour le texte normal).
+ * (palette Sneat aux couleurs CSC) respectent le contraste WCAG AA
+ * (4,5:1 pour le texte normal).
  */
-const css = readFileSync(path.resolve(__dirname, '../../app/globals.css'), 'utf8');
-
-function block(selector: string): Record<string, string> {
-  const re = new RegExp(`${selector.replace('.', '\\.')}\\s*\\{([^}]*)\\}`);
-  const body = re.exec(css)?.[1] ?? '';
-  const vars: Record<string, string> = {};
-  for (const m of body.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})/g)) vars[m[1]] = m[2];
-  return vars;
-}
-
 function luminance(hex: string): number {
   const [r, g, b] = [1, 3, 5].map((i) => {
     const c = parseInt(hex.slice(i, i + 2), 16) / 255;
@@ -30,7 +20,7 @@ function contrast(a: string, b: string): number {
 }
 
 // [texte, fond] — paires effectivement utilisées dans l'interface.
-const PAIRS: [string, string][] = [
+const PAIRS: [TokenName, TokenName][] = [
   ['text', 'bg'],
   ['text', 'surface'],
   ['text', 'surface-2'],
@@ -54,16 +44,36 @@ const PAIRS: [string, string][] = [
   ['success', 'surface'],
   ['muted', 'primary-soft'],
   ['info', 'info-soft'],
+  ['info', 'bg'],
+  // Boutons pleins MUI (contrastText) : rouge « danger », succès, etc.
+  ['on-status', 'error'],
+  ['on-status', 'success'],
+  ['on-status', 'warning'],
+  ['on-status', 'info'],
+  // Bouton « secondaire » plein (texte = fond du papier).
+  ['bg', 'muted'],
+  // Menu latéral bleu nuit.
+  ['nav-text', 'nav-bg'],
+  ['nav-text', 'nav-hover'],
+  ['nav-muted', 'nav-bg'],
+  ['nav-active-fg', 'nav-active-from'],
+  ['nav-active-fg', 'nav-active-to'],
+  // Texte des cartes de statistiques (fond dégradé vers la teinte douce).
+  ['text', 'primary-soft'],
+  ['text', 'info-soft'],
+  ['text', 'success-soft'],
+  ['text', 'error-soft'],
+  ['muted', 'info-soft'],
+  ['muted', 'success-soft'],
+  ['muted', 'error-soft'],
 ];
 
 describe.each([
-  ['clair', ':root'],
-  ['sombre', '.dark'],
-])('thème %s — contraste WCAG AA', (_name, selector) => {
-  const vars = block(selector);
+  ['clair', 'light'],
+  ['sombre', 'dark'],
+] as const)('thème %s — contraste WCAG AA', (_name, mode) => {
+  const vars = tokens[mode];
   it.each(PAIRS)('%s sur %s ≥ 4,5:1', (fg, bg) => {
-    expect(vars[fg], `--${fg} manquant`).toBeDefined();
-    expect(vars[bg], `--${bg} manquant`).toBeDefined();
     expect(contrast(vars[fg], vars[bg])).toBeGreaterThanOrEqual(4.5);
   });
 });

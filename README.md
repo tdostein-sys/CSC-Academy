@@ -1,231 +1,200 @@
-# Plateforme CSC — Crypto Sans Complexe
+# Plateforme CSC — Crypto Sans Complexe (version thème Sneat)
 
-Application web unique (FR / EN) regroupant les activités de CSC :
+Reconstruction **fonctionnellement identique** de la plateforme CSC (projet de référence `c:\ProjetAC\CSC`) avec le design et les composants du template **Sneat (MUI)**. Elle est branchée sur **la même base Supabase en ligne** et **le même compte Brevo** que l'application d'origine.
 
 | Module | État |
 |---|---|
-| **Socle** (comptes, rôles, thèmes, notifications, audit) | ✅ Étape 1 |
-| **CSC Ambassador** (ambassadeurs, campagnes, soumissions, paiements) | ✅ Étape 2 |
-| **CSC Academy** (formations, inscriptions, paiements Notch Pay) | ⏳ Étape 3 |
-| **CSC Consulting / CSC GA** | Page « Bientôt disponible » + proposition (étape 4) |
+| **Socle** (comptes, rôles, langue FR/EN, thèmes clair/sombre, notifications, audit, administration) | ✅ |
+| **CSC Ambassador** (charte, campagnes, déclarations d'ID, soldes, paiements, file d'envoi, exports CSV) | ✅ |
+| **CSC Academy** (formations) | ✅ lots 1, 2 et 3 livrés et appliqués (formations, paiements, rappels, commissions, évaluation, attestations, visio intégrée) ([cahier des charges](docs/CSC_ACADEMY_CAHIER_DES_CHARGES.md)) |
+| **CSC Consulting / CSC GA** | page « Bientôt disponible » |
 
-Stack : **Next.js 16** (App Router, TypeScript) · **Supabase** (PostgreSQL, Auth, Storage) · **Tailwind CSS 4** · **next-intl** · **Zod** · e-mails via **Brevo** ou **EmailJS**.
+Stack : **Next.js 16** (App Router, TypeScript, Turbopack) · **React 19** · **MUI 5** + thème Sneat · **Supabase** (PostgreSQL, Auth, Storage) · **next-intl** · **Zod** · e-mails **Brevo** (ou EmailJS) · traduction **DeepL** · tests **Vitest** + **PGlite**.
 
 ---
+
+## ⚠️ À lire en premier : la base est partagée et déjà migrée
+
+- **Ne lancez AUCUNE migration** et ne créez, modifiez ou supprimez aucune table, vue, fonction, politique ou bucket. La base en ligne est celle de l'application CSC d'origine : elle est déjà à jour.
+- **Pas de seed** : l'administrateur `csc_admin` existe déjà (pas de script `seed:admin` dans ce projet).
+- Les fichiers de [supabase/migrations/](supabase/migrations/) sont une **copie pour documentation et tests locaux** (ils servent aux tests SQL, exécutés sur une base en mémoire). Toute évolution future du schéma se fera par une **nouvelle** migration, appliquée **à la main** dans Supabase par un responsable, jamais automatiquement.
+- **Aucun test n'écrit dans la base en ligne.**
+
+### Migrations CSC Academy à appliquer (une seule fois chacune, dans l'ordre)
+
+| Fichier | Contenu | État |
+|---|---|---|
+| [20261118000100_academy.sql](supabase/migrations/20261118000100_academy.sql) | Lot 1 : formations, sessions, inscriptions, paiements, contenus, bucket privé `academy-files` | ✅ appliqué |
+| [20261119000100_academy_lot2.sql](supabase/migrations/20261119000100_academy_lot2.sql) | Lot 2 : blocage J+3, rappels, commissions, évaluation finale, attestations | ✅ appliqué |
+| [20261120000100_academy_lot3.sql](supabase/migrations/20261120000100_academy_lot3.sql) | Lot 3 : salles de visio, présences, enregistrements (suppression à 7 jours) | ✅ appliqué |
+
+Ces fichiers **ne modifient aucune table existante** : ils ajoutent des tables, vues et fonctions `academy_*`. Le lot 2 remplace en plus, par une version étendue, la fonction d'accès aux contenus (blocage J+3), la vue des soldes (colonne `blocked_since` ajoutée) et la fonction appelée après chaque paiement (délivrance de l'attestation).
+
+1. Relire le fichier.
+2. Supabase › **SQL Editor** › *New query* › coller **tout** le contenu › *Run*.
+3. Vérifier dans *Table Editor* que les nouvelles tables apparaissent (lot 2 : `academy_evaluations`, `academy_questions`, `academy_certificates`…).
+
+Tant que le lot 2 n'est pas appliqué, les nouvelles pages (évaluation, commissions, attestations) restent vides ou affichent une erreur générique ; le reste de l'application fonctionne normalement.
 
 ## 1. Prérequis
 
 - Node.js **22.13 ou plus** (`node -v`)
-- Un projet [Supabase](https://supabase.com) (offre gratuite suffisante pour démarrer)
-- Un compte [Brevo](https://www.brevo.com) (recommandé) **ou** [EmailJS](https://www.emailjs.com)
+- npm (le projet n'utilise pas yarn)
+- Les accès existants : projet Supabase, compte Brevo, clé DeepL (facultative)
 
 ## 2. Installation
 
-```bash
+```powershell
+cd c:\ProjetAC\Template-main
 npm install
-cp .env.example .env.local     # Windows : copy .env.example .env.local  (copier, ne pas renommer)
+copy .env.example .env.local      # copier, ne pas renommer
 ```
 
-Puis renseignez `.env.local` (voir § 3).
+Puis renseignez `.env.local` (voir § 3). Le `.env.local` de l'application CSC d'origine fonctionne **tel quel** (mêmes noms de variables).
 
-> **Poste Windows d'entreprise** : si `npm install` échoue sur un paquet `esbuild`, c'est que la politique de sécurité du poste bloque son exécutable. Le projet n'en a pas besoin (le seed utilise le support TypeScript natif de Node).
+> **Poste Windows d'entreprise** : si `npm install` échoue sur un paquet `esbuild`, c'est la politique de sécurité du poste qui bloque son exécutable ; le projet n'en a pas besoin. Docker n'est pas nécessaire non plus.
 
 ## 3. Variables d'environnement
 
-Toutes sont documentées dans [.env.example](.env.example). Résumé :
+Toutes sont documentées dans [.env.example](.env.example) (fichier sans aucune valeur). Résumé :
 
 | Variable | Où la trouver | Secret ? |
 |---|---|---|
 | `NEXT_PUBLIC_SITE_URL` | URL de l'application (`http://localhost:3000` en local) | non |
+| `DEV_ALLOWED_ORIGINS` | nom du PC si le serveur de dev est ouvert par ce nom (dev uniquement) | non |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase › Project Settings › API | non |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase › API Keys › *publishable* (ou *anon*) | non |
 | `SUPABASE_SECRET_KEY` | Supabase › API Keys › *secret* (ou *service_role*) | **OUI** |
-| `SEED_ADMIN_USERNAME` / `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` | à choisir | **OUI** (mot de passe) |
-| `EMAIL_PROVIDER` | `brevo`, `emailjs` ou `console` | non |
-| `BREVO_API_KEY`, `BREVO_SENDER_EMAIL` | Brevo › SMTP & API | **OUI** (clé) |
-| `EMAILJS_*` | EmailJS › Account / Email Services / Templates | **OUI** (clé privée) |
-| `WHATSAPP_ENABLED` | `false` tant que WhatsApp n'est pas branché | non |
-| `DEEPL_API_KEY` | [DeepL API Free](https://www.deepl.com/pro-api) (traduction automatique, voir § 7 bis) | **OUI** |
+| `EMAIL_PROVIDER` | `brevo`, `emailjs` ou `console` (vide = `console`) | non |
+| `EMAIL_FROM_NAME` | nom d'expéditeur affiché | non |
+| `BREVO_API_KEY`, `BREVO_SENDER_EMAIL` | Brevo › SMTP & API › API Keys (clé `xkeysib-…`) | **OUI** (clé) |
+| `EMAILJS_*` | EmailJS (alternative à Brevo) | **OUI** (clé privée) |
+| `WHATSAPP_*` | désactivé (`WHATSAPP_ENABLED` vide ou `false`) | **OUI** (jeton) |
+| `DEEPL_API_KEY` | [DeepL API Free](https://www.deepl.com/pro-api) (clé `…:fx`) | **OUI** |
+| `LIVEKIT_URL` | [LiveKit Cloud](https://cloud.livekit.io) › projet › Settings › Project (`wss://…livekit.cloud`) | non |
+| `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | LiveKit › Settings › Keys | **OUI** |
+| `RECORDINGS_S3_ENDPOINT`, `RECORDINGS_S3_BUCKET` | Cloudflare › R2 (`https://<compte>.r2.cloudflarestorage.com`, `csc-academy-recordings`) | non |
+| `RECORDINGS_S3_ACCESS_KEY_ID`, `RECORDINGS_S3_SECRET_ACCESS_KEY` | R2 › Manage API tokens (*Object Read & Write*, limité au bucket) | **OUI** |
 | `CRON_SECRET` | chaîne aléatoire longue (`openssl rand -hex 32`) | **OUI** |
 
-⚠️ Les variables `NEXT_PUBLIC_*` sont visibles dans le navigateur : n'y mettez jamais de secret. `SUPABASE_SECRET_KEY` contourne la sécurité de la base ; elle n'est utilisée que côté serveur.
+Règles :
+- Les variables `NEXT_PUBLIC_*` sont visibles dans le navigateur : **jamais de secret dedans**.
+- `SUPABASE_SECRET_KEY` contourne la sécurité de la base : elle n'est lue que par du code serveur (`server-only`).
+- `.env.local` est exclu de Git (`.gitignore`) : ne le partagez jamais (ni par e-mail, ni sur une messagerie).
 
-## 4. Configuration de Supabase
+## 4. Supabase : seul réglage à vérifier
 
-### 4.1 Appliquer les migrations
+Rien à créer. **Si l'adresse de l'application change** (nouveau PC, nom de machine, domaine de production), ajoutez-la dans Supabase › **Authentication › URL Configuration** :
+- *Site URL* : la valeur de `NEXT_PUBLIC_SITE_URL` ;
+- *Redirect URLs* : `<url>/**` (ex. `http://localhost:3000/**`, `https://csc.example.com/**`).
 
-Les migrations SQL versionnées sont dans [supabase/migrations/](supabase/migrations/). Deux options :
+Sans cela, les liens des e-mails (confirmation d'inscription, mot de passe oublié) ne fonctionnent pas.
 
-**A. Éditeur SQL (le plus simple)** : Supabase › SQL Editor › collez le contenu de chaque fichier **dans l'ordre des noms** et exécutez.
+## 5. Lancer l'application
 
-| Fichier | Contenu |
-|---|---|
-| `20261116000100_core.sql` | profils, rôles, contenus, notifications, audit |
-| `20261116000200_ambassador.sql` | ambassadeurs, campagnes, soumissions, soldes, paiements, bucket Storage `campaign-files` |
-| `20261116000300_content_translation.sql` | langue de saisie des contenus (traduction automatique) |
-| `20261116000400_delivery_queue.sql` | file d'envoi des messages aux ambassadeurs (supervision, relance des échecs) |
-| `20261116000500_payout_confirmation.sql` | clôture bloquée tant que les paiements ne sont pas confirmés ; état de paiement par ID |
-| `20261116000600_participation_lock.sql` | impossible de ne plus participer après avoir soumis un ID (en attente ou validé) |
-
-Chaque fichier ne s'applique **qu'une seule fois** (ne relancez pas un fichier déjà exécuté).
-
-**B. Supabase CLI** :
-```bash
-npx supabase login
-npx supabase link --project-ref <ref-du-projet>
-npx supabase db push
+```powershell
+npm run dev                  # développement : http://localhost:3000
+npm run build; npm start     # production locale
 ```
 
-### 4.2 Authentification (Supabase › Authentication)
+- Un visiteur qui ouvre l'application arrive directement sur **« Se connecter / Créer un compte »**.
+- Connexion administrateur : `csc_admin` (ou son adresse e-mail) avec son mot de passe actuel.
+- Si vous ouvrez le serveur de dev par le **nom du PC** (et non `localhost`), ajoutez ce nom dans `DEV_ALLOWED_ORIGINS` et l'URL dans Supabase (§ 4).
 
-1. **URL Configuration**
-   - *Site URL* : la valeur de `NEXT_PUBLIC_SITE_URL`
-   - *Redirect URLs* : ajoutez `http://localhost:3000/auth/confirm` (et l'URL de production + `/auth/confirm`)
-2. **Sign In / Providers › Email** : activé, *Confirm email* activé (recommandé).
-3. **Emails › SMTP Settings** — **fortement recommandé** : le serveur d'e-mails par défaut de Supabase est limité à quelques e-mails par heure. Branchez le SMTP de Brevo (gratuit) :
-   - Host `smtp-relay.brevo.com`, port `587`
-   - Identifiant et mot de passe : Brevo › SMTP & API › onglet SMTP
-   - Expéditeur : votre adresse vérifiée dans Brevo
-4. **Emails › Templates** (recommandé, pour que les liens fonctionnent même ouverts sur un autre appareil) :
-   - *Confirm signup* : remplacez le lien par
-     `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard`
-   - *Reset password* : remplacez le lien par
-     `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery`
+## 6. Fonctionnement
 
-## 5. E-mails de l'application (notifications)
+### Socle
+- **Langue** : français par défaut, bascule complète en anglais (cookie `NEXT_LOCALE` ; enregistrée dans le profil, elle fixe aussi la langue des e-mails).
+- **Thème** : bouton soleil / lune dans la barre du haut ; tant qu'on n'a pas choisi, le thème suit celui de l'appareil.
+- **Comptes** : inscription (e-mail de confirmation), connexion par identifiant ou e-mail, mot de passe oublié, changement imposé si nécessaire. Les messages d'erreur ne révèlent jamais si un compte existe.
+- **Mon espace**, **Profil**, **Notifications** (centre de notifications + e-mails).
+- **Administration** (`/admin`) : vue d'ensemble, utilisateurs, contenus (charte ambassadeur), envois, journal d'audit.
 
-Les notifications (campagne lancée, soumission validée…) passent par une couche [lib/notifications/](lib/notifications/) : chaque notification est **enregistrée dans l'application** (centre de notifications) et **mise en file** pour l'envoi par e-mail. Un envoi qui échoue est réessayé automatiquement (2, 4, 8, 16 min… jusqu'à 5 tentatives).
+### CSC Ambassador
+**Côté ambassadeur** (`/ambassador`) : lecture de la charte et bouton « D'accord » (profil complet exigé) → badge `CSC-AMB-0001` ; campagnes en cours (vidéo chargée au clic, mode opératoire, choix « Je participe / Je ne participe pas » modifiable tant qu'aucun ID n'est soumis) ; déclaration d'ID Binance + volume ; suivi des gains et **confirmation de réception** des paiements.
 
-### Brevo (recommandé)
-Offre gratuite : **300 e-mails/jour** (≈ 9 000/mois), contre 200/mois pour EmailJS.
-1. Créez un compte Brevo, vérifiez une adresse expéditrice (Senders, Domains & Dedicated IPs). Idéalement, authentifiez votre propre domaine (SPF/DKIM) pour éviter les spams ; une adresse Gmail comme expéditeur est souvent filtrée.
-2. SMTP & API › onglet **API Keys** › *Generate a new API key*. ⚠️ La clé API commence par `xkeysib-`. Ne pas confondre avec la clé **SMTP** (`xsmtpsib-…`, onglet SMTP), qui ne sert qu'au réglage SMTP de Supabase (§ 4.2) : avec elle, Brevo répond `401 Key not found`.
-3. `.env.local` : `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY=…`, `BREVO_SENDER_EMAIL=…`
+**Côté admin** (`/admin/ambassador`) : vue d'ensemble et **exports CSV** ; campagnes (brouillon → lancer → clôturer ; la clôture reste grisée, avec la liste des blocages, tant qu'il reste des soumissions en attente, un montant dû ou un paiement non confirmé) ; soumissions (valider, rejeter avec motif, supprimer un rejet) ; paiements (partiels possibles) ; ambassadeurs (suspendre avec motif, réactiver) ; file d'envoi (traiter maintenant, réessayer).
 
-### EmailJS (alternative)
-1. Account › Security : cochez **« Allow EmailJS API for non-browser applications »**.
-2. Créez un service e-mail, puis **un modèle générique** :
-   - *To Email* : `{{to_email}}` — *Subject* : `{{subject}}`
-   - *Content* (HTML) : `{{{message_html}}}` (triple accolades : HTML déjà échappé par l'application)
-3. `.env.local` : `EMAIL_PROVIDER=emailjs` + les 4 variables `EMAILJS_*`.
+### CSC Academy (lot 1)
+**Catalogue** (`/academy`, visible sans compte) : formations publiées, sessions ouvertes, prix, échéancier, places restantes. **Inscription** (compte et profil complets exigés) avec **code de parrainage** facultatif, pré-rempli par un lien `/academy?ref=CSC-AMB-0001` : la place est réservée **3 jours**, puis libérée automatiquement si aucun paiement n'est reçu.
 
-### Développement
-`EMAIL_PROVIDER=console` affiche les e-mails dans le terminal au lieu de les envoyer.
+**Espace étudiant** (`/student`) : état de chaque inscription, échéancier (tranches payées, partielles, en retard, délais accordés), paiements reçus, instructions de paiement ; une fois le premier paiement enregistré : séances (bouton « Rejoindre » 15 min avant), documents PDF (liens temporaires), liens de cours, vidéos YouTube / TikTok / Vimeo / Google Drive chargées au clic. Une inscription sans paiement peut être annulée ; ensuite, ni remboursement ni désistement.
 
-### WhatsApp
-Canal prévu dans [lib/notifications/channels.ts](lib/notifications/channels.ts), **désactivé** (`WHATSAPP_ENABLED=false`). Pour l'activer plus tard : compte WhatsApp Business + WhatsApp Cloud API (Meta), modèles de messages approuvés, puis renseigner `WHATSAPP_PHONE_NUMBER_ID` et `WHATSAPP_ACCESS_TOKEN`.
+**Côté admin** (`/admin/academy`) : formations (brouillon → publiée → archivée), sessions (dates, places, taux de commission, instructions de paiement), **échéancier** (1 à 12 tranches, figé dès le premier paiement), ouverture / fermeture des inscriptions, **enregistrement des paiements** (partiels possibles, jamais au-delà du reste dû), délais, annulation d'une inscription non payée, séances (lien de visio externe en attendant la visio intégrée), documents, liens et vidéos ; listes des inscrits et des paiements. Les étudiants et les admins sont prévenus par notification et e-mail.
 
-### Reprise des envois (cron)
-Appelez périodiquement (ex. toutes les 5 minutes) :
-```
-GET /api/cron/notifications
-Authorization: Bearer <CRON_SECRET>
-```
+### CSC Academy (lot 2)
+**Rappels et blocage** : chaque matin, la tâche planifiée envoie les rappels de paiement (e-mail + notification) **3 jours avant** la date limite d'une tranche et **le jour même**, puis, **3 jours après** une tranche impayée, **bloque l'accès** (séances, documents, liens, vidéos, évaluation) et prévient l'étudiant. Le blocage est calculé par la base à chaque accès : il est levé **immédiatement** dès que le paiement est enregistré ou qu'un délai est accordé. Chaque rappel n'est envoyé qu'une fois.
 
-## 6. Premier administrateur (seed)
+**Commissions des ambassadeurs** : pourcentage du prix (taux de la session, figé à l'inscription), **dû une fois la formation entièrement payée**. L'ambassadeur voit ses parrainages dans son espace (prénom + initiale, formation, avancement du paiement) et son lien de parrainage ; ses commissions s'ajoutent à ses gains. Côté admin : `/admin/academy/commissions` (« Payer », historique, export CSV) ; l'ambassadeur confirme la réception comme pour les campagnes.
 
-Après avoir appliqué les migrations et renseigné `SEED_ADMIN_*` :
-```bash
-npm run seed:admin
-```
-- Crée l'utilisateur `csc_admin` (e-mail `SEED_ADMIN_EMAIL`) avec le rôle administrateur.
-- Le mot de passe (`SEED_ADMIN_PASSWORD`, 12 caractères min. avec lettres et chiffres) doit être **changé à la première connexion** : l'application l'impose.
-- Le script est **idempotent** (relançable sans risque). Pour réinitialiser le mot de passe : `npm run seed:admin -- --reset-password`.
-- Vous pouvez ensuite **vider `SEED_ADMIN_PASSWORD`** de `.env.local`.
+**Évaluation finale** (`/admin/academy/sessions/<id>/evaluation`) : questionnaire à choix unique ou multiple, seuil de réussite et nombre de tentatives fixés par l'admin, correction automatique **par la base** (les bonnes réponses ne sont jamais envoyées aux étudiants). Questions et seuil figés dès la première copie rendue.
 
-Connexion : `/auth/login` avec `csc_admin` **ou** l'adresse e-mail.
+**Attestation** : délivrée **automatiquement** quand l'évaluation est réussie **et** la formation entièrement payée ; PDF téléchargeable dans l'espace étudiant, numéro unique non devinable (`CSC-2027-00012-7F3A`). **Page publique de vérification** : `/academy/verify`. L'admin peut retirer une attestation (motif obligatoire) depuis `/admin/academy/certificates`.
 
-## 7. CSC Ambassador — fonctionnement
+### CSC Academy (lot 3) : visio intégrée
+**Séances** : par défaut, chaque séance utilise la visio intégrée (LiveKit). Un lien externe (Meet, Zoom…) reste possible : il remplace alors la visio intégrée pour cette séance.
 
-**Côté ambassadeur** (`/ambassador`)
-1. L'utilisateur lit la charte et clique sur **« D'accord »** (profil complet exigé) : il reçoit un badge et un numéro séquentiel `CSC-AMB-0001`, jamais réutilisé.
-2. À chaque campagne lancée, il est notifié (application + e-mail). Sur la page de la campagne : vidéo (chargée seulement au clic), mode opératoire (texte et/ou fichier), choix **Je participe / Je ne participe pas** (modifiable tant que la campagne est ouverte). Chaque ouverture est comptée **une seule fois** par ambassadeur.
-3. S'il participe, il **déclare des comptes** : ID Binance (unique sur toute la plateforme) + volume de trading (≥ minimum de la campagne s'il existe). Il peut retirer une déclaration encore en attente.
-4. Il suit ses gains (**toujours calculés** à partir des comptes validés et des paiements) et **confirme la réception** de chaque paiement.
+**Animateur (admin)** : bouton « Animer la séance » sur la page de la session (`/live/<séance>`). La salle s'ouvre **à partir d'une heure avant** le début ; l'**enregistrement démarre automatiquement**. Dans la salle : caméra, micro, **partage d'écran** ; liste des participants avec les mains levées dans l'ordre d'arrivée ; « Donner la parole » (micro), « Autoriser la caméra », « Couper tous les micros » ; « Terminer la séance » déconnecte tout le monde et arrête l'enregistrement.
 
-**Côté admin** (`/admin/ambassador`)
-- Tableau de bord : ambassadeurs, soumissions à traiter, total dû / payé, paiements non confirmés, **exports CSV** (soumissions, soldes, paiements, ambassadeurs).
-- **Campagnes** : brouillon → **lancer** (exige modop + vidéo ; le montant et le volume minimum sont alors **figés**) → **clôturer**. La clôture est **refusée par la base** (et le bouton reste grisé) tant qu'il reste des soumissions en attente, un montant dû non payé, ou un paiement dont l'ambassadeur n'a **pas confirmé la réception**. Un ID validé n'est considéré comme « Payé » qu'après cette confirmation (sinon : « Payé, réception à confirmer »).
-- **Soumissions** : valider, ou rejeter avec un motif (visible par l'ambassadeur). Une soumission rejetée peut être supprimée (action auditée), ce qui libère l'ID Binance.
-- **Paiements** : depuis la campagne, bouton « Payer » par ambassadeur (paiements partiels possibles, jamais au-delà du dû ; moyen + référence).
-- **Ambassadeurs** : recherche, suspension avec motif (l'ambassadeur garde l'accès à ses gains et paiements), réactivation.
-- **File d'envoi** : chaque message envoyé aux ambassadeurs (destinataire, type, objet, canal, statut, tentatives, dernière erreur, lu ou non dans l'application), avec compteurs et filtres. Boutons **« Traiter la file maintenant »** (envoie ce qui est en attente — utile tant que le cron n'est pas planifié) et **« Réessayer »** (un envoi ou tous les échecs, action auditée).
+**Étudiant** : « Rejoindre » apparaît 15 minutes avant le début, **seulement s'il est inscrit, à jour (non bloqué)**. Il entre micro et caméra coupés, peut **lever la main** et écrire dans la **discussion** ; un mode « audio seul » économise les données mobiles. Les droits sont imposés par le serveur LiveKit (jeton signé par notre serveur, après vérification par la base) : impossible d'allumer sa caméra sans autorisation, même en bricolant le navigateur.
 
-Toutes ces actions sont **vérifiées côté serveur** (fonctions SQL `SECURITY DEFINER` + RLS) et **journalisées** dans l'audit.
+**Enregistrements** : stockés dans **Cloudflare R2** (bucket privé, hors Supabase, sans frais de visionnage). Replay visible par les inscrits à jour pendant **7 jours**, par un lien temporaire (2 h) ; ensuite le fichier est **effacé** par la tâche quotidienne (et, en filet de sécurité, par la règle de suppression à 7 jours du bucket). L'admin peut supprimer un enregistrement plus tôt. Présences : nombre d'étudiants entrés, affiché par séance.
 
-**Fichiers de mode opératoire** : bucket Storage privé `campaign-files` (créé par la migration ; PDF, PNG, JPEG, WebP ; 5 Mo max). Les ambassadeurs y accèdent par des liens temporaires (1 h), uniquement pour les campagnes lancées.
+**À la mise en ligne** : LiveKit › Settings › **Webhooks** › ajouter l'adresse `https://<votre-site>/api/livekit/webhook` (signée avec vos clés LiveKit). Sans elle tout fonctionne, mais un replay n'apparaît qu'au passage de la tâche quotidienne au lieu de quelques minutes après la séance.
 
-## 7 bis. Traduction automatique des contenus
+Paiement en ligne : pas encore branché, mais la base distingue déjà les paiements « en cours / confirmés / échoués » et propose deux fonctions réservées au serveur pour l'ajouter plus tard.
 
-L'admin rédige chaque contenu (campagne : titre, résumé, mode opératoire ; charte ambassadeur) **une seule fois**, dans la langue de son choix (« Langue de saisie »). À l'enregistrement, l'application le traduit automatiquement dans l'autre langue avec **DeepL** et stocke les deux versions : le sélecteur « Langue » affiche ensuite la bonne version instantanément, sans appel externe.
+Toutes les règles sensibles sont **dans la base** (fonctions SQL `SECURITY DEFINER` + RLS) : chaque action est vérifiée une première fois par l'action serveur (rôle + validation Zod), puis par la base. Les confirmations passent par une boîte de dialogue intégrée.
 
-Mise en place :
-1. Créez un compte sur [deepl.com/pro-api](https://www.deepl.com/pro-api) › offre **DeepL API Free** (500 000 caractères/mois gratuits ; une carte bancaire peut être demandée pour vérification, sans prélèvement).
-2. Compte › *API Keys* : copiez la clé (elle se termine par `:fx`) dans `DEEPL_API_KEY`.
+### Traduction automatique
+Chaque contenu (campagne, charte) est saisi **une seule fois**, dans la langue choisie (« Langue de saisie ») ; DeepL produit l'autre version à l'enregistrement. Sans clé ou sans quota, le contenu reste dans sa langue d'origine et un message le signale.
 
-Sans clé (ou si le quota est atteint), le contenu est enregistré dans sa langue d'origine et s'affiche ainsi pour tous ; un message le signale à l'admin. Il suffit de l'enregistrer à nouveau plus tard pour le traduire. La structure Markdown (titres, listes) est préservée : seul le texte de chaque ligne est traduit.
+## 7. Qualité et tests
 
-## 8. Lancer l'application
+> Lancez les tests depuis **PowerShell** (`Set-Location C:\ProjetAC\Template-main`). Depuis Git Bash, une différence de casse de la lettre de lecteur (`c:` / `C:`) fait échouer Vitest.
 
-```bash
-npm run dev        # développement : http://localhost:3000
-npm run build && npm start   # production locale
+```powershell
+npm run typecheck   # TypeScript
+npm run lint        # ESLint
+npm test            # Vitest (tests unitaires + tests SQL)
+npm run check       # tout, plus le build
 ```
 
-## 9. Qualité et tests
+- **Tests SQL** ([tests/db/](tests/db/)) : PostgreSQL en WebAssembly (PGlite), **en mémoire, sans Docker**, sur une copie locale des migrations. Ils vérifient la RLS et les règles d'Ambassador (calcul des soldes, unicité de l'ID Binance, blocage de la clôture, paiements plafonnés, accès par rôle) et d'Academy (places, réservation de 3 jours, code de parrainage, échéancier figé, paiements plafonnés, accès aux contenus réservé aux inscrits actifs, blocage J+3 et déblocage, rappels envoyés une seule fois, commissions, correction du questionnaire, attestation et vérification publique). Ils ne touchent **jamais** la base en ligne.
+- **Tests unitaires** ([tests/unit/](tests/unit/)) : validation des formulaires, notifications, fournisseurs d'e-mail, export CSV, liens vidéo, questionnaire et PDF de l'attestation, parité des traductions FR/EN et **contraste WCAG AA** des thèmes clair et sombre (dont le menu latéral).
 
-```bash
-npm run typecheck  # TypeScript
-npm run lint       # ESLint
-npm test           # Vitest
-npm run check      # les quatre, plus le build
-```
-
-Les tests SQL ([tests/db/](tests/db/)) s'exécutent **sans Docker** : ils lancent PostgreSQL en WebAssembly (PGlite), reproduisent l'environnement Supabase (schéma `auth`, rôles `anon` / `authenticated`, privilèges par défaut) et appliquent les **vraies migrations**. Ils vérifient la RLS et les règles métier sous l'identité de chaque rôle.
-
-Les tests unitaires ([tests/unit/](tests/unit/)) couvrent la validation des formulaires, les modèles de notifications, les fournisseurs d'e-mail, l'export CSV (dont la protection contre l'injection de formules), les liens vidéo, la parité des traductions FR/EN et le **contraste WCAG AA** des thèmes clair et sombre.
-
-Règles critiques d'Ambassador testées sur la base ([tests/db/ambassador.test.ts](tests/db/ambassador.test.ts)) : **calcul du solde**, **unicité de l'ID Binance**, **blocage de la clôture**, paiement plafonné au dû, montant figé au lancement, vue comptée une fois, numérotation, et **accès par rôle** (visiteur, ambassadeur, ambassadeur suspendu, admin).
-
-## 10. Sécurité — principes
-
-- **RLS activée sur toutes les tables** ; les privilèges par défaut de Supabase sont révoqués puis rouverts au cas par cas.
-- Les actions sensibles passent par des **fonctions SQL `SECURITY DEFINER`** qui vérifient elles-mêmes le rôle (jamais uniquement l'interface), et par des actions serveur qui revalident tout avec Zod.
-- Le rôle administrateur est stocké dans `user_roles`, **non modifiable** par un utilisateur.
-- **Journal d'audit** en ajout seul (toute modification ou suppression est refusée par un trigger).
-- Redirections après connexion limitées aux chemins internes (pas de redirection ouverte).
-- Le message d'erreur de connexion ne révèle pas si un compte existe.
-
-## 11. Arborescence
+## 8. Arborescence
 
 ```
-app/                 pages (App Router) et actions serveur
-  auth/              connexion, inscription, mots de passe, /auth/confirm
-  ambassador/        espace ambassadeur (charte, campagnes, déclarations, paiements)
-  admin/             administration (vue d'ensemble, Ambassador, utilisateurs, contenus, envois, audit)
-  api/cron/          tâches planifiées
-components/          composants d'interface
-i18n/, messages/     langues (fr par défaut, en)
-lib/                 logique serveur : supabase, auth, notifications, e-mail, validation
-proxy.ts             session Supabase + garde des routes (ex-middleware)
-scripts/             seed de l'administrateur
-supabase/migrations/ migrations SQL versionnées
-tests/               tests unitaires et SQL
-docs/                propositions (Consulting / GA — étape 4)
+src/
+  app/
+    (app)/            pages dans le cadre Sneat (menu latéral + barre du haut)
+      ambassador/     espace ambassadeur
+      academy/        catalogue des formations, inscription, ouverture des PDF, vérification des attestations
+      student/        espace étudiant (mes formations, évaluation finale, attestation PDF)
+      admin/          administration (dont admin/ambassador et admin/academy)
+      dashboard/, profile/, notifications/, consulting/, ga/
+    auth/             connexion, inscription, mots de passe, /auth/confirm
+    api/cron/         tâche planifiée quotidienne (notifications, rappels et blocage Academy)
+  @core/theme/        thème Sneat (palette, typographie, composants) ; couleurs dans tokens.ts
+  components/         composants d'interface (cadre, formulaires, cartes, tableaux…)
+  i18n/, messages/    langues (fr par défaut, en)
+  lib/                logique serveur : supabase, auth, notifications, e-mail, traduction, validation
+  proxy.ts            session Supabase + garde des routes
+supabase/migrations/  copie des migrations (documentation + tests locaux, NE PAS EXÉCUTER)
+tests/                tests unitaires et SQL
+public/               logo (versions claire et sombre), illustrations
 ```
 
-## 12. Déploiement
+## 9. Déploiement (Vercel)
 
-Hébergement recommandé : **Vercel** (compatible avec tout hébergeur Next.js).
+1. **Code** : dépôt GitHub privé, **sans** `.env.local`.
+2. **Vercel** › *Add New › Project* › importer le dépôt. Dans *Environment Variables*, reporter les variables de `.env.local` (§ 3), avec `NEXT_PUBLIC_SITE_URL` = l'URL publique (pas `localhost`) et `EMAIL_PROVIDER=brevo`. `DEV_ALLOWED_ORIGINS` est inutile en ligne.
+3. **Supabase** › Authentication › URL Configuration : ajouter l'URL publique (§ 4). Seules migrations à appliquer à la main : celles d'Academy (voir en haut de ce fichier).
+4. **Cron** : [vercel.json](vercel.json) appelle `/api/cron/notifications` une fois par jour à 6 h UTC, soit 7 h au Cameroun (Vercel transmet `CRON_SECRET`). C'est cette tâche qui envoie les rappels de paiement Academy, libère les places non payées et efface les enregistrements de plus de 7 jours.
+   **LiveKit** › Settings › Webhooks : ajouter `https://<votre-site>/api/livekit/webhook` (voir « CSC Academy (lot 3) »).
+5. **Domaine** (facultatif) : Vercel › Settings › Domains ; dans Brevo, authentifier ce domaine (SPF/DKIM).
 
-1. **Code** : le dépôt GitHub (privé) contient le code, **jamais** `.env.local` (exclu par `.gitignore`).
-2. **Vercel** › *Add New › Project* › importer le dépôt (Next.js détecté automatiquement). Avant *Deploy*, dans *Environment Variables*, reporter les variables de `.env.local` (voir § 3) :
-   - `NEXT_PUBLIC_SITE_URL` = l'URL publique (ex. `https://csc.example.com`), **pas** `localhost` ;
-   - Supabase, Brevo (`EMAIL_PROVIDER=brevo`, clé `xkeysib-`), `DEEPL_API_KEY`, `CRON_SECRET` ;
-   - les variables `SEED_ADMIN_*` sont inutiles en ligne.
-   Ensuite, chaque `git push` sur `main` redéploie automatiquement.
-3. **Supabase** › Authentication › URL Configuration : *Site URL* = l'URL publique ; *Redirect URLs* : ajouter `https://<url-publique>/**`. Toutes les migrations (§ 4.1) doivent être appliquées. Recommandé : un **projet Supabase distinct pour la production** (migrations + `npm run seed:admin` avec les clés de ce projet).
-4. **Domaine** (facultatif) : Vercel › Settings › Domains, puis les entrées DNS indiquées. Dans Brevo, authentifier ce domaine (SPF/DKIM) et utiliser une adresse expéditrice de ce domaine.
-5. **Cron** : [vercel.json](vercel.json) planifie `/api/cron/notifications` **une fois par jour** (limite de l'offre Vercel gratuite ; Vercel transmet automatiquement `CRON_SECRET`). Pour une reprise toutes les 5 minutes : passer `schedule` à `*/5 * * * *` avec l'offre Pro, ou programmer un appel sur [cron-job.org](https://cron-job.org) avec l'en-tête `Authorization: Bearer <CRON_SECRET>`.
+## 10. Sauvegarde du template d'origine
 
-Coûts à prévoir : l'offre Vercel *Hobby* est réservée à un usage non commercial (offre *Pro* pour CSC) ; un projet Supabase gratuit est mis en pause après une semaine d'inactivité (offre *Pro* conseillée en production, avec sauvegardes).
+Le template Sneat d'origine, intact, est conservé dans `c:\ProjetAC\Template-main.original-backup`.

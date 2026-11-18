@@ -16,6 +16,17 @@ const samples: { [K in NotificationType]: TemplateParams[K] } = {
   'submission.validated': { campaignTitle: 'Binance Q1', binanceUid: '123456789', amount: '2 000 FCFA' },
   'submission.rejected': { campaignTitle: 'Binance Q1', binanceUid: '123456789', reason: 'KYC incomplet' },
   'payout.marked_paid': { campaignTitle: 'Binance Q1', amount: '10 000 FCFA', method: 'MTN MoMo', reference: 'TX1' },
+  'academy.enrolled': { courseTitle: 'Trading', sessionLabel: 'Janvier', firstAmount: '40 000 FCFA', holdUntil: '21 nov. 2026' },
+  'academy.new_enrollment': { studentName: 'Awa N.', courseTitle: 'Trading', sessionLabel: 'Janvier' },
+  'academy.payment_recorded': { courseTitle: 'Trading', amount: '40 000 FCFA', remaining: '60 000 FCFA', activated: true },
+  'academy.enrollment_cancelled': { courseTitle: 'Trading', sessionLabel: 'Janvier' },
+  'academy.reminder_due_soon': { courseTitle: 'Trading', rank: 2, amount: '30 000 FCFA', dueDate: '10/02/2027' },
+  'academy.reminder_due_today': { courseTitle: 'Trading', rank: 2, amount: '30 000 FCFA', blockDate: '13/02/2027' },
+  'academy.access_blocked': { courseTitle: 'Trading', rank: 2, amount: '30 000 FCFA' },
+  'academy.commission_earned': { courseTitle: 'Trading', studentLabel: 'Awa N.', amount: '10 000 FCFA' },
+  'academy.commission_paid': { courseTitle: 'Trading', amount: '10 000 FCFA', method: 'Orange Money', reference: 'TX1' },
+  'academy.evaluation_opened': { courseTitle: 'Trading' },
+  'academy.certificate_issued': { courseTitle: 'Trading', number: 'CSC-2027-00001-AB12' },
 };
 
 describe('modèles de notifications', () => {
