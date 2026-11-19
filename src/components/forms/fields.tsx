@@ -175,12 +175,24 @@ export function SelectField({
   );
 }
 
-export function CheckboxField({ name, label, error, required }: { name: string; label: ReactNode; error?: string; required?: boolean }) {
+export function CheckboxField({
+  name,
+  label,
+  error,
+  required,
+  defaultChecked,
+}: {
+  name: string;
+  label: ReactNode;
+  error?: string;
+  required?: boolean;
+  defaultChecked?: boolean;
+}) {
   const errorText = useErrorText();
   return (
     <Box>
       <FormControlLabel
-        control={<Checkbox name={name} required={required} inputProps={{ 'aria-invalid': Boolean(error) }} />}
+        control={<Checkbox name={name} required={required} defaultChecked={defaultChecked} inputProps={{ 'aria-invalid': Boolean(error) }} />}
         label={label}
         sx={{ alignItems: 'flex-start', '& .MuiCheckbox-root': { mt: -1 }, '& .MuiFormControlLabel-label': { fontSize: '0.9375rem' } }}
       />

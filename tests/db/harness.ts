@@ -8,6 +8,7 @@
  * requêtes sous l'identité d'un utilisateur, ce qui active la RLS.
  */
 import { PGlite } from '@electric-sql/pglite';
+import { btree_gist } from '@electric-sql/pglite/contrib/btree_gist';
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -15,6 +16,10 @@ const SUPABASE_SHIM = /* sql */ `
   create role anon nologin noinherit;
   create role authenticated nologin noinherit;
   create role service_role nologin noinherit bypassrls;
+
+  -- Schéma des extensions de Supabase (btree_gist pour CSC Consulting).
+  create schema extensions;
+  grant usage on schema extensions to anon, authenticated, service_role;
 
   create schema auth;
   create table auth.users (
@@ -60,7 +65,7 @@ const MIGRATIONS_DIR = path.resolve(__dirname, '../../supabase/migrations');
 export type TestDb = PGlite;
 
 export async function createTestDb(): Promise<TestDb> {
-  const db = new PGlite();
+  const db = new PGlite({ extensions: { btree_gist } });
   await db.exec(SUPABASE_SHIM);
   const files = readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith('.sql')).sort();
   for (const file of files) {

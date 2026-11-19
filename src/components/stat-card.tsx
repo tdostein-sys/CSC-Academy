@@ -10,6 +10,8 @@ import {
   AlertTriangle,
   Award,
   BadgeCheck,
+  BriefcaseBusiness,
+  CalendarCheck,
   CheckCircle2,
   ClipboardCheck,
   Clock,
@@ -29,7 +31,7 @@ import { tok } from '@/@core/theme/tokens';
 export type StatTone = 'primary' | 'success' | 'warning' | 'error' | 'info' | 'accent';
 
 // Liste explicite : seules ces icônes sont incluses dans le code envoyé au navigateur.
-const ICONS = { Users, Shield, Clock, AlertTriangle, Wallet, CheckCircle2, Inbox, Megaphone, Coins, BadgeCheck, Hourglass, ListChecks, Target, ClipboardCheck, Award, Lock };
+const ICONS = { Users, Shield, Clock, AlertTriangle, Wallet, CheckCircle2, Inbox, Megaphone, Coins, BadgeCheck, Hourglass, ListChecks, Target, ClipboardCheck, Award, Lock, CalendarCheck, BriefcaseBusiness };
 type IconName = keyof typeof ICONS;
 
 /**

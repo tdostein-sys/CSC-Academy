@@ -19,7 +19,7 @@ export default async function HomePage() {
   const modules: { key: ModuleKey; href: string; soon: boolean }[] = [
     { key: 'ambassador', href: '/ambassador', soon: false },
     { key: 'academy', href: '/academy', soon: false },
-    { key: 'consulting', href: '/consulting', soon: true },
+    { key: 'consulting', href: '/consulting', soon: false },
     { key: 'ga', href: '/ga', soon: true },
   ];
 

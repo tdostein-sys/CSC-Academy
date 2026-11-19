@@ -7,6 +7,8 @@ export const PROTECTED_PREFIXES = [
   '/ambassador',
   '/student',
   '/live',
+  '/consulting/bookings',
+  '/consulting/manage',
 ];
 
 /** Routes accessibles même lorsqu'un changement de mot de passe est imposé. */

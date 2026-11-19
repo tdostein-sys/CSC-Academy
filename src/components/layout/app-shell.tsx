@@ -27,9 +27,11 @@ import {
   Bell,
   BookOpen,
   Briefcase,
+  CalendarClock,
   ClipboardList,
   FileText,
   GraduationCap,
+  Headset,
   Home,
   Inbox,
   LayoutDashboard,
@@ -60,6 +62,8 @@ export interface ShellUser {
   lastName: string;
   email: string;
   isAdmin: boolean;
+  /** Conseiller CSC Consulting actif. */
+  isAdvisor: boolean;
   ambassadorCode: string | null;
   unread: number;
 }
@@ -109,7 +113,7 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
       items: [
         { href: '/ambassador', label: t('ambassador'), Icon: Megaphone },
         { href: '/academy', label: t('academy'), Icon: GraduationCap },
-        { href: '/consulting', label: t('consulting'), Icon: BarChart3, soon: true },
+        { href: '/consulting', label: t('consulting'), Icon: BarChart3, exact: true },
         { href: '/ga', label: t('ga'), Icon: Briefcase, soon: true },
       ],
     },
@@ -119,6 +123,8 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
             title: ts('account'),
             items: [
               { href: '/student', label: t('student'), Icon: BookOpen },
+              { href: '/consulting/bookings', label: t('appointments'), Icon: CalendarClock },
+              ...(user.isAdmin || user.isAdvisor ? [{ href: '/consulting/manage', label: t('consultations'), Icon: Headset }] : []),
               { href: '/notifications', label: t('notifications'), Icon: Bell, badge: user.unread },
               { href: '/profile', label: t('profile'), Icon: User },
             ],
@@ -133,6 +139,7 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
               { href: '/admin', label: ta('overview'), Icon: Shield, exact: true },
               { href: '/admin/ambassador', label: ta('ambassador'), Icon: Megaphone },
               { href: '/admin/academy', label: ta('academy'), Icon: GraduationCap },
+              { href: '/admin/consulting', label: ta('consulting'), Icon: BarChart3 },
               { href: '/admin/contact', label: ta('contact'), Icon: Inbox },
               { href: '/admin/users', label: ta('users'), Icon: Users },
               { href: '/admin/content', label: ta('content'), Icon: FileText },

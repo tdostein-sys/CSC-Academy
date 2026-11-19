@@ -27,7 +27,40 @@ export interface TemplateParams {
   'academy.evaluation_opened': { courseTitle: string };
   'academy.certificate_issued': { courseTitle: string; number: string };
   'contact.new_request': { name: string; subject: ContactSubjectLabel; excerpt: string; course: string };
+  'consulting.booked': { offerTitle: string; date: string; amount: string; holdUntil: string; free: boolean; mode: ConsultingModeLabel; location: string };
+  'consulting.new_booking': { clientName: string; offerTitle: string; date: string; free: boolean };
+  'consulting.confirmed': { offerTitle: string; date: string; amount: string; mode: ConsultingModeLabel; location: string };
+  'consulting.cancelled': { offerTitle: string; date: string; byClient: boolean; refundDue: boolean };
+  'consulting.cancelled_staff': { clientName: string; offerTitle: string; date: string; byClient: boolean };
+  'consulting.rescheduled': { offerTitle: string; oldDate: string; newDate: string };
+  'consulting.expired': { offerTitle: string; date: string };
+  'consulting.reminder_day': { offerTitle: string; date: string; mode: ConsultingModeLabel; location: string };
+  'consulting.reminder_hour': { offerTitle: string; date: string; mode: ConsultingModeLabel; location: string };
+  'consulting.reminder_staff': { clientName: string; offerTitle: string; date: string; mode: ConsultingModeLabel; phone: string };
+  'consulting.report_published': { offerTitle: string; date: string };
+  'consulting.refunded': { offerTitle: string; amount: string; reference: string };
 }
+
+/** Mode de consultation, dans la langue du destinataire. */
+export type ConsultingModeLabel = 'video' | 'phone' | 'in_person';
+const CONSULTING_WHERE: Record<Locale, (mode: ConsultingModeLabel, location: string) => string> = {
+  fr: (mode, location) =>
+    mode === 'video'
+      ? 'en visio : le lien est dans votre espace « Mes rendez-vous », 15 minutes avant le début'
+      : mode === 'phone'
+        ? 'par téléphone : votre conseiller vous appellera au numéro de votre profil'
+        : `en rencontre physique : ${location}`,
+  en: (mode, location) =>
+    mode === 'video'
+      ? 'by video: the link is in your "My appointments" area, 15 minutes before the start'
+      : mode === 'phone'
+        ? 'by phone: your advisor will call you on the number in your profile'
+        : `in person: ${location}`,
+};
+const CONSULTING_MODE_NAMES: Record<Locale, Record<ConsultingModeLabel, string>> = {
+  fr: { video: 'visio', phone: 'téléphone', in_person: 'rencontre physique' },
+  en: { video: 'video', phone: 'phone', in_person: 'in person' },
+};
 
 /** Libellé du sujet d'un message de contact, dans la langue du destinataire. */
 export type ContactSubjectLabel = 'payment' | 'course' | 'technical' | 'other';
@@ -259,6 +292,138 @@ const templates: Templates = {
     en: (p) => ({
       title: 'Your certificate is ready',
       body: `Congratulations! Your certificate for "${p.courseTitle}" (no. ${p.number}) is ready to download in your courses area.`,
+    }),
+  },
+  'consulting.booked': {
+    fr: (p) =>
+      p.free
+        ? {
+            title: `Rendez-vous confirmé : ${p.offerTitle}`,
+            body: `Votre rendez-vous « ${p.offerTitle} » du ${p.date} est confirmé. Il aura lieu ${CONSULTING_WHERE.fr(p.mode, p.location)}.`,
+          }
+        : {
+            title: `Rendez-vous réservé : ${p.offerTitle}`,
+            body: `Votre créneau du ${p.date} est réservé jusqu'au ${p.holdUntil}. Réglez ${p.amount} avant cette date pour confirmer le rendez-vous ; sans paiement, le créneau sera libéré. Les instructions de paiement sont dans « Mes rendez-vous ».`,
+          },
+    en: (p) =>
+      p.free
+        ? {
+            title: `Appointment confirmed: ${p.offerTitle}`,
+            body: `Your appointment "${p.offerTitle}" on ${p.date} is confirmed. It will take place ${CONSULTING_WHERE.en(p.mode, p.location)}.`,
+          }
+        : {
+            title: `Appointment booked: ${p.offerTitle}`,
+            body: `Your slot on ${p.date} is held until ${p.holdUntil}. Pay ${p.amount} before then to confirm the appointment; without payment, the slot will be released. Payment instructions are in "My appointments".`,
+          },
+  },
+  'consulting.new_booking': {
+    fr: (p) => ({
+      title: 'Nouveau rendez-vous de conseil',
+      body: `${p.clientName} a réservé « ${p.offerTitle} » le ${p.date}.${p.free ? ' Rendez-vous gratuit, confirmé.' : ' En attente de paiement.'}`,
+    }),
+    en: (p) => ({
+      title: 'New consulting appointment',
+      body: `${p.clientName} booked "${p.offerTitle}" on ${p.date}.${p.free ? ' Free appointment, confirmed.' : ' Awaiting payment.'}`,
+    }),
+  },
+  'consulting.confirmed': {
+    fr: (p) => ({
+      title: `Rendez-vous confirmé : ${p.offerTitle}`,
+      body: `CSC a bien reçu votre paiement de ${p.amount}. Votre rendez-vous du ${p.date} est confirmé. Il aura lieu ${CONSULTING_WHERE.fr(p.mode, p.location)}.`,
+    }),
+    en: (p) => ({
+      title: `Appointment confirmed: ${p.offerTitle}`,
+      body: `CSC has received your payment of ${p.amount}. Your appointment on ${p.date} is confirmed. It will take place ${CONSULTING_WHERE.en(p.mode, p.location)}.`,
+    }),
+  },
+  'consulting.cancelled': {
+    fr: (p) => ({
+      title: 'Rendez-vous annulé',
+      body: `${p.byClient ? 'Votre annulation est enregistrée' : 'CSC a annulé votre rendez-vous'} : « ${p.offerTitle} » du ${p.date}.${p.refundDue ? ' Le remboursement de votre paiement sera traité par CSC ; vous serez prévenu.' : ''}`,
+    }),
+    en: (p) => ({
+      title: 'Appointment cancelled',
+      body: `${p.byClient ? 'Your cancellation has been recorded' : 'CSC has cancelled your appointment'}: "${p.offerTitle}" on ${p.date}.${p.refundDue ? ' CSC will process the refund of your payment; you will be notified.' : ''}`,
+    }),
+  },
+  'consulting.cancelled_staff': {
+    fr: (p) => ({
+      title: 'Rendez-vous annulé',
+      body: `Le rendez-vous « ${p.offerTitle} » de ${p.clientName} du ${p.date} a été annulé${p.byClient ? ' par le client' : ''}. Le créneau est libéré.`,
+    }),
+    en: (p) => ({
+      title: 'Appointment cancelled',
+      body: `The appointment "${p.offerTitle}" with ${p.clientName} on ${p.date} has been cancelled${p.byClient ? ' by the client' : ''}. The slot is released.`,
+    }),
+  },
+  'consulting.rescheduled': {
+    fr: (p) => ({
+      title: 'Rendez-vous déplacé',
+      body: `Le rendez-vous « ${p.offerTitle} » prévu le ${p.oldDate} est déplacé au ${p.newDate}.`,
+    }),
+    en: (p) => ({
+      title: 'Appointment moved',
+      body: `The appointment "${p.offerTitle}" planned on ${p.oldDate} has been moved to ${p.newDate}.`,
+    }),
+  },
+  'consulting.expired': {
+    fr: (p) => ({
+      title: 'Réservation expirée',
+      body: `Faute de paiement dans le délai, votre réservation « ${p.offerTitle} » du ${p.date} a expiré et le créneau a été libéré. Vous pouvez réserver un nouveau créneau à tout moment.`,
+    }),
+    en: (p) => ({
+      title: 'Booking expired',
+      body: `As no payment was received in time, your booking "${p.offerTitle}" on ${p.date} has expired and the slot has been released. You can book a new slot at any time.`,
+    }),
+  },
+  'consulting.reminder_day': {
+    fr: (p) => ({
+      title: `Rappel : rendez-vous demain`,
+      body: `Rappel : votre rendez-vous « ${p.offerTitle} » a lieu le ${p.date}, ${CONSULTING_WHERE.fr(p.mode, p.location)}.`,
+    }),
+    en: (p) => ({
+      title: `Reminder: appointment tomorrow`,
+      body: `Reminder: your appointment "${p.offerTitle}" takes place on ${p.date}, ${CONSULTING_WHERE.en(p.mode, p.location)}.`,
+    }),
+  },
+  'consulting.reminder_hour': {
+    fr: (p) => ({
+      title: `Votre rendez-vous commence bientôt`,
+      body: `Votre rendez-vous « ${p.offerTitle} » commence le ${p.date}, ${CONSULTING_WHERE.fr(p.mode, p.location)}.`,
+    }),
+    en: (p) => ({
+      title: `Your appointment starts soon`,
+      body: `Your appointment "${p.offerTitle}" starts on ${p.date}, ${CONSULTING_WHERE.en(p.mode, p.location)}.`,
+    }),
+  },
+  'consulting.reminder_staff': {
+    fr: (p) => ({
+      title: `Consultation à venir : ${p.clientName}`,
+      body: `Consultation « ${p.offerTitle} » avec ${p.clientName} le ${p.date} (${CONSULTING_MODE_NAMES.fr[p.mode]}${p.mode === 'phone' ? `, à appeler au ${p.phone}` : ''}).`,
+    }),
+    en: (p) => ({
+      title: `Upcoming consultation: ${p.clientName}`,
+      body: `Consultation "${p.offerTitle}" with ${p.clientName} on ${p.date} (${CONSULTING_MODE_NAMES.en[p.mode]}${p.mode === 'phone' ? `, call on ${p.phone}` : ''}).`,
+    }),
+  },
+  'consulting.report_published': {
+    fr: (p) => ({
+      title: 'Compte rendu disponible',
+      body: `Le compte rendu de votre consultation « ${p.offerTitle} » du ${p.date} est disponible dans « Mes rendez-vous ».`,
+    }),
+    en: (p) => ({
+      title: 'Report available',
+      body: `The report of your consultation "${p.offerTitle}" on ${p.date} is available in "My appointments".`,
+    }),
+  },
+  'consulting.refunded': {
+    fr: (p) => ({
+      title: 'Remboursement effectué',
+      body: `CSC indique vous avoir remboursé ${p.amount} pour le rendez-vous « ${p.offerTitle} » (réf. ${p.reference}).`,
+    }),
+    en: (p) => ({
+      title: 'Refund sent',
+      body: `CSC reports having refunded you ${p.amount} for the appointment "${p.offerTitle}" (ref. ${p.reference}).`,
     }),
   },
 };

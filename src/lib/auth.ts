@@ -10,6 +10,8 @@ export interface SessionUser {
   mustChangePassword: boolean;
   profile: Profile;
   isAdmin: boolean;
+  /** Conseiller CSC Consulting actif (vérifié en base). */
+  isAdvisor: boolean;
   /** Renseigné si l'utilisateur a accepté la charte ambassadeur. */
   ambassador: { code: string; status: 'active' | 'suspended' } | null;
   unreadNotifications: number;
@@ -27,11 +29,12 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const claims = data?.claims;
   if (!claims?.sub) return null;
 
-  const [profileRes, adminRes, unreadRes, ambassadorRes] = await Promise.all([
+  const [profileRes, adminRes, unreadRes, ambassadorRes, advisorRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', claims.sub).single(),
     supabase.rpc('is_admin'),
     supabase.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null),
     supabase.from('ambassadors').select('code, status').eq('user_id', claims.sub).maybeSingle(),
+    supabase.rpc('consulting_is_advisor'),
   ]);
 
   if (!profileRes.data) return null;
@@ -42,6 +45,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     mustChangePassword: Boolean((claims.app_metadata as Record<string, unknown> | undefined)?.must_change_password),
     profile: profileRes.data as Profile,
     isAdmin: adminRes.data === true,
+    isAdvisor: advisorRes.data === true,
     ambassador: (ambassadorRes.data as SessionUser['ambassador']) ?? null,
     unreadNotifications: unreadRes.count ?? 0,
   };
@@ -71,6 +75,20 @@ export async function requireAdmin(): Promise<SessionUser> {
 export async function assertAdmin(): Promise<SessionUser> {
   const user = await getSessionUser();
   if (!user || !user.isAdmin || user.mustChangePassword) throw new Error('forbidden');
+  return user;
+}
+
+/** Exige d'être collaborateur CSC Consulting (administrateur ou conseiller actif). */
+export async function requireConsultingStaff(nextPath = '/consulting/manage'): Promise<SessionUser> {
+  const user = await requireUser(nextPath);
+  if (!user.isAdmin && !user.isAdvisor) redirect('/dashboard');
+  return user;
+}
+
+/** Variante pour les actions serveur (la base revérifie ensuite chaque droit). */
+export async function assertConsultingStaff(): Promise<SessionUser> {
+  const user = await getSessionUser();
+  if (!user || user.mustChangePassword || (!user.isAdmin && !user.isAdvisor)) throw new Error('forbidden');
   return user;
 }
 

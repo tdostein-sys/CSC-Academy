@@ -10,6 +10,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         lastName: user.profile.last_name,
         email: user.email,
         isAdmin: user.isAdmin,
+        isAdvisor: user.isAdvisor,
         ambassadorCode: user.ambassador?.code ?? null,
         unread: user.unreadNotifications,
       }

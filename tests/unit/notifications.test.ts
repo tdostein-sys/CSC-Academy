@@ -28,6 +28,18 @@ const samples: { [K in NotificationType]: TemplateParams[K] } = {
   'academy.evaluation_opened': { courseTitle: 'Trading' },
   'academy.certificate_issued': { courseTitle: 'Trading', number: 'CSC-2027-00001-AB12' },
   'contact.new_request': { name: 'Awa Ndiaye', subject: 'payment', excerpt: 'Je veux payer ma tranche.', course: 'Trading (Session 1)' },
+  'consulting.booked': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00', amount: '25 000 FCFA', holdUntil: '23 nov. 2026 18:00', free: false, mode: 'video', location: '' },
+  'consulting.new_booking': { clientName: 'Awa Ndiaye', offerTitle: 'Bilan', date: '24 nov. 2026 10:00', free: false },
+  'consulting.confirmed': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00', amount: '25 000 FCFA', mode: 'in_person', location: 'Akwa, Douala' },
+  'consulting.cancelled': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00', byClient: false, refundDue: true },
+  'consulting.cancelled_staff': { clientName: 'Awa Ndiaye', offerTitle: 'Bilan', date: '24 nov. 2026 10:00', byClient: true },
+  'consulting.rescheduled': { offerTitle: 'Bilan', oldDate: '24 nov. 2026 10:00', newDate: '25 nov. 2026 11:00' },
+  'consulting.expired': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00' },
+  'consulting.reminder_day': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00', mode: 'phone', location: '' },
+  'consulting.reminder_hour': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00', mode: 'video', location: '' },
+  'consulting.reminder_staff': { clientName: 'Awa Ndiaye', offerTitle: 'Bilan', date: '24 nov. 2026 10:00', mode: 'phone', phone: '+237690000000' },
+  'consulting.report_published': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00' },
+  'consulting.refunded': { offerTitle: 'Bilan', amount: '25 000 FCFA', reference: 'RB-1' },
 };
 
 describe('modèles de notifications', () => {
