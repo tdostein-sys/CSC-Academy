@@ -31,10 +31,12 @@ import {
   FileText,
   GraduationCap,
   Home,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Megaphone,
   Menu as MenuIcon,
+  MessageCircle,
   Send,
   Shield,
   User,
@@ -99,6 +101,7 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
       items: [
         { href: '/', label: t('home'), Icon: Home, exact: true },
         ...(user ? [{ href: '/dashboard', label: t('dashboard'), Icon: LayoutDashboard }] : []),
+        { href: '/contact', label: t('contact'), Icon: MessageCircle },
       ],
     },
     {
@@ -130,6 +133,7 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
               { href: '/admin', label: ta('overview'), Icon: Shield, exact: true },
               { href: '/admin/ambassador', label: ta('ambassador'), Icon: Megaphone },
               { href: '/admin/academy', label: ta('academy'), Icon: GraduationCap },
+              { href: '/admin/contact', label: ta('contact'), Icon: Inbox },
               { href: '/admin/users', label: ta('users'), Icon: Users },
               { href: '/admin/content', label: ta('content'), Icon: FileText },
               { href: '/admin/deliveries', label: ta('deliveries'), Icon: Send },

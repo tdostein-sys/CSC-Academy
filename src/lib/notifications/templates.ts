@@ -26,7 +26,15 @@ export interface TemplateParams {
   'academy.commission_paid': { courseTitle: string; amount: string; method: string; reference: string };
   'academy.evaluation_opened': { courseTitle: string };
   'academy.certificate_issued': { courseTitle: string; number: string };
+  'contact.new_request': { name: string; subject: ContactSubjectLabel; excerpt: string; course: string };
 }
+
+/** Libellé du sujet d'un message de contact, dans la langue du destinataire. */
+export type ContactSubjectLabel = 'payment' | 'course' | 'technical' | 'other';
+const CONTACT_SUBJECT_LABELS: Record<Locale, Record<ContactSubjectLabel, string>> = {
+  fr: { payment: 'Paiement', course: 'Question sur une formation', technical: 'Problème technique', other: 'Autre' },
+  en: { payment: 'Payment', course: 'Question about a course', technical: 'Technical issue', other: 'Other' },
+};
 
 export type NotificationType = keyof TemplateParams;
 
@@ -141,6 +149,16 @@ const templates: Templates = {
     en: (p) => ({
       title: `Enrolment recorded: ${p.courseTitle}`,
       body: `Your seat for "${p.courseTitle}" (${p.sessionLabel}) is held until ${p.holdUntil}. Pay the first instalment (${p.firstAmount}) before then to confirm your enrolment. Payment instructions are in your courses area.`,
+    }),
+  },
+  'contact.new_request': {
+    fr: (p) => ({
+      title: `Nouveau message (${CONTACT_SUBJECT_LABELS.fr[p.subject]}) : ${p.name}`,
+      body: `${p.name} vous a écrit depuis la page Contact${p.course ? ` au sujet de « ${p.course} »` : ''} :\n\n« ${p.excerpt} »\n\nRépondez-lui depuis la boîte de réception de l'administration.`,
+    }),
+    en: (p) => ({
+      title: `New message (${CONTACT_SUBJECT_LABELS.en[p.subject]}): ${p.name}`,
+      body: `${p.name} wrote to you from the Contact page${p.course ? ` about "${p.course}"` : ''}:\n\n"${p.excerpt}"\n\nReply from the administration inbox.`,
     }),
   },
   'academy.new_enrollment': {

@@ -5,7 +5,8 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { ArrowLeft, Award, ClipboardCheck, Download, ExternalLink, FileText, Link2, Lock, ShieldCheck, Video } from 'lucide-react';
+import { ArrowLeft, Award, ClipboardCheck, Download, ExternalLink, FileText, Link2, Lock, Mail, MessageCircle, ShieldCheck, Video } from 'lucide-react';
+import { whatsappLink } from '@/lib/contact';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { ActionForm } from '@/components/forms/action-form';
@@ -66,7 +67,13 @@ export default async function StudentEnrollmentPage({
   const user = await requireUser('/student');
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   if (!UUID.test(id)) notFound();
-  const [t, ta, locale, supabase] = await Promise.all([getTranslations('student'), getTranslations('academy'), getLocale(), createClient()]);
+  const [t, ta, tc, locale, supabase] = await Promise.all([
+    getTranslations('student'),
+    getTranslations('academy'),
+    getTranslations('contact'),
+    getLocale(),
+    createClient(),
+  ]);
   const l = locale as Locale;
 
   const { data } = await supabase.from('academy_enrollments').select(ENROLLMENT_COLUMNS).eq('id', id).eq('student_id', user.id).maybeSingle();
@@ -133,6 +140,15 @@ export default async function StudentEnrollmentPage({
     e.status === 'active' && !blocked && evaluation?.status === 'open' && !passedAttempt && attempts.length < num(evaluation.max_attempts);
   const instructions = localized(l, s.payment_instructions_fr, s.payment_instructions_en);
   const firstUnpaid = states.find((st) => st.state !== 'paid');
+  // Contact pour le paiement : WhatsApp de CSC avec un message déjà écrit.
+  const { data: contact } = num(b?.remaining) > 0 ? await supabase.from('contact_settings').select('whatsapp').maybeSingle() : { data: null };
+  const paymentWhatsapp = whatsappLink(
+    (contact as { whatsapp: string } | null)?.whatsapp,
+    tc('whatsappPayment', {
+      name: `${user.profile.first_name} ${user.profile.last_name}`.trim() || '…',
+      course: `${courseTitle} — ${localized(l, s.label_fr, s.label_en)}`,
+    }),
+  );
   const documents = resources.filter((r) => r.kind === 'document');
   const links = resources.filter((r) => r.kind === 'link');
   const videos = resources.filter((r) => r.kind === 'video');
@@ -177,7 +193,19 @@ export default async function StudentEnrollmentPage({
                 : undefined
           }
         >
-          {instructions.trim() ? <Markdown source={instructions} /> : <Typography variant="body2">{t('noInstructions')}</Typography>}
+          <Stack spacing={4}>
+            {instructions.trim() ? <Markdown source={instructions} /> : <Typography variant="body2">{t('noInstructions')}</Typography>}
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              {paymentWhatsapp && (
+                <Button href={paymentWhatsapp} target="_blank" rel="noopener noreferrer" variant="contained" startIcon={<MessageCircle aria-hidden size={18} />}>
+                  {t('payWhatsapp')}
+                </Button>
+              )}
+              <LinkButton href={`/contact?subject=payment&enrollment=${e.id}`} variant={paymentWhatsapp ? 'outlined' : 'contained'} startIcon={<Mail aria-hidden size={18} />}>
+                {t('payContact')}
+              </LinkButton>
+            </Box>
+          </Stack>
         </SectionCard>
       )}
 

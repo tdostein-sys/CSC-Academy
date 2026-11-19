@@ -44,7 +44,8 @@
     "register": "Sign up",
     "logout": "Log out",
     "mainNav": "Main navigation",
-    "student": "My courses"
+    "student": "My courses",
+    "contact": "Contact"
   },
   "home": {
     "heroTitle": "Learn, invest and grow with CSC",
@@ -427,7 +428,8 @@
       "audit": "Audit log",
       "deliveries": "Deliveries",
       "ambassador": "Ambassador",
-      "academy": "Academy"
+      "academy": "Academy",
+      "contact": "Messages"
     },
     "overview": {
       "users": "Registered users",
@@ -450,7 +452,8 @@
       "title": "Editable content",
       "help": "Simple Markdown format: \"## Title\", \"### Subtitle\", \"- list item\", **bold**.",
       "keys": {
-        "ambassador_charter": "Ambassador charter (criteria and missions)"
+        "ambassador_charter": "Ambassador charter (criteria and missions)",
+        "contact_page": "Contact page (welcome text, opening hours)"
       },
       "saved": "Content saved.",
       "body": "Content"
@@ -868,7 +871,7 @@
     "paymentInstructions": "How to pay",
     "pendingBody": "Your seat is held until {date}. Pay the first instalment ({amount}) to confirm your enrolment.",
     "nextInstallment": "Next payment: instalment {rank}, {amount}, by {date}.",
-    "noInstructions": "Contact CSC on WhatsApp to pay your instalment.",
+    "noInstructions": "Contact CSC (button below or Contact page) to find out how to pay your instalment.",
     "remaining": "Remaining",
     "schedule": "Payment schedule",
     "installment": "Instalment",
@@ -944,7 +947,9 @@
     "replayExpired": "The viewing time is over.",
     "replayInterrupted": "Playback was interrupted.",
     "replayRetry": "Restart playback",
-    "replayProtection": "This replay is reserved for students of this course: please do not share it."
+    "replayProtection": "This replay is reserved for students of this course: please do not share it.",
+    "payWhatsapp": "Pay via WhatsApp",
+    "payContact": "Send a message to CSC"
   },
   "adminAcademy": {
     "saved": "Changes saved.",
@@ -1328,5 +1333,96 @@
     "course": "Course",
     "session": "Session",
     "issued": "Issued on"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "A question, a payment to make? The CSC team will answer you.",
+    "whatsappTitle": "WhatsApp",
+    "whatsappText": "The fastest way: message us directly, your message is already written.",
+    "whatsappButton": "Message on WhatsApp",
+    "phoneTitle": "Phone",
+    "callButton": "Call",
+    "emailTitle": "Email",
+    "emailButton": "Send an email",
+    "formTitle": "Send a message",
+    "formSubtitle": "We answer by email or WhatsApp, usually within 24 hours (working days).",
+    "name": "Full name",
+    "email": "Email address",
+    "emailHint": "So we can answer you.",
+    "phone": "WhatsApp number",
+    "phoneHint": "Example: 690000000 or +237690000000.",
+    "subject": "Subject",
+    "subjects": {
+      "payment": "Course payment",
+      "course": "Question about a course",
+      "technical": "Technical issue",
+      "other": "Other"
+    },
+    "enrollment": "Related course",
+    "enrollmentHint": "Optional: helps us find your enrolment faster.",
+    "enrollmentNone": "None in particular",
+    "message": "Your message",
+    "messageHint": "{max} characters maximum.",
+    "send": "Send message",
+    "sent": "Thank you, your message has been sent. The CSC team will answer you shortly.",
+    "errors": {
+      "rateLimited": "You have sent several messages recently. Please wait a little before sending another one."
+    },
+    "validation": {
+      "messageTooShort": "Your message is too short (at least 10 characters)."
+    },
+    "whatsappHello": "Hello CSC, I have a question: ",
+    "whatsappHelloNamed": "Hello CSC, I am {name}. I have a question: ",
+    "whatsappPayment": "Hello CSC, I am {name}. I am enrolled in \"{course}\" and I would like to pay my instalment. How should I proceed?"
+  },
+  "adminContact": {
+    "title": "Messages",
+    "subtitle": "{count, plural, =0 {No message to handle.} one {# message to handle.} other {# messages to handle.}}",
+    "settingsTitle": "Contact details shown on the Contact page",
+    "settingsHint": "Leave a field empty to hide it.",
+    "settingsEmpty": "No contact details yet: visitors only see the form. Add at least the WhatsApp number.",
+    "whatsapp": "CSC WhatsApp number",
+    "whatsappHint": "Example: 690000000 or +237690000000. Used by the “Message on WhatsApp” button and the students’ “Pay via WhatsApp” button.",
+    "phone": "Phone",
+    "email": "Contact email address",
+    "textHint": "The welcome text (opening hours, response times) is edited in",
+    "textLink": "Content",
+    "settingsSave": "Save contact details",
+    "settingsSaved": "Contact details saved.",
+    "viewPage": "View the Contact page",
+    "filtersLabel": "Filter messages",
+    "filters": {
+      "open": "To handle",
+      "done": "Handled",
+      "all": "All"
+    },
+    "empty": "No message here.",
+    "status": {
+      "new": "New",
+      "in_progress": "In progress",
+      "done": "Handled"
+    },
+    "subjects": {
+      "payment": "Payment",
+      "course": "Course",
+      "technical": "Technical",
+      "other": "Other"
+    },
+    "visitor": "visitor without an account",
+    "enrollmentLink": "Enrolment: {course} — {session}",
+    "replyWhatsapp": "Reply on WhatsApp",
+    "replyWhatsappText": "Hello {name}, this is the CSC team. We have received your message. ",
+    "replyEmail": "Reply by email",
+    "replySubject": "Your message to CSC",
+    "call": "Call",
+    "followUp": "Follow-up",
+    "followUpWithNote": "Follow-up (note saved)",
+    "statusLabel": "Status",
+    "note": "Internal note",
+    "noteHint": "Visible to administrators only.",
+    "save": "Save",
+    "saved": "Follow-up saved.",
+    "handledAt": "Follow-up last updated: {date}",
+    "limitNotice": "Only the {count} most recent messages are shown."
   }
 }

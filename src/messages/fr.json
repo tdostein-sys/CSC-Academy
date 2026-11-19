@@ -44,7 +44,8 @@
     "register": "Créer un compte",
     "logout": "Se déconnecter",
     "mainNav": "Navigation principale",
-    "student": "Mes formations"
+    "student": "Mes formations",
+    "contact": "Contact"
   },
   "home": {
     "heroTitle": "Apprendre, investir et grandir avec CSC",
@@ -427,7 +428,8 @@
       "audit": "Journal d'audit",
       "deliveries": "Envois",
       "ambassador": "Ambassador",
-      "academy": "Academy"
+      "academy": "Academy",
+      "contact": "Messages"
     },
     "overview": {
       "users": "Utilisateurs inscrits",
@@ -450,7 +452,8 @@
       "title": "Contenus éditables",
       "help": "Format Markdown simple : « ## Titre », « ### Sous-titre », « - élément de liste », **gras**.",
       "keys": {
-        "ambassador_charter": "Charte ambassadeur (critères et missions)"
+        "ambassador_charter": "Charte ambassadeur (critères et missions)",
+        "contact_page": "Page Contact (texte d’accueil, horaires)"
       },
       "saved": "Contenu enregistré.",
       "body": "Contenu"
@@ -868,7 +871,7 @@
     "paymentInstructions": "Comment payer",
     "pendingBody": "Votre place est réservée jusqu'au {date}. Réglez la première tranche ({amount}) pour confirmer votre inscription.",
     "nextInstallment": "Prochaine tranche : tranche {rank}, {amount}, avant le {date}.",
-    "noInstructions": "Contactez CSC sur WhatsApp pour régler votre tranche.",
+    "noInstructions": "Contactez CSC (bouton ci-dessous ou page Contact) pour savoir comment régler votre tranche.",
     "remaining": "Reste à payer",
     "schedule": "Échéancier",
     "installment": "Tranche",
@@ -944,7 +947,9 @@
     "replayExpired": "Le délai de visionnage est écoulé.",
     "replayInterrupted": "La lecture s’est interrompue.",
     "replayRetry": "Relancer la lecture",
-    "replayProtection": "Ce replay est réservé aux inscrits de la formation : merci de ne pas le diffuser."
+    "replayProtection": "Ce replay est réservé aux inscrits de la formation : merci de ne pas le diffuser.",
+    "payWhatsapp": "Payer via WhatsApp",
+    "payContact": "Envoyer un message à CSC"
   },
   "adminAcademy": {
     "saved": "Modifications enregistrées.",
@@ -1328,5 +1333,96 @@
     "course": "Formation",
     "session": "Session",
     "issued": "Délivrée le"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Une question, un paiement à régler ? L’équipe CSC vous répond.",
+    "whatsappTitle": "WhatsApp",
+    "whatsappText": "Le plus rapide : écrivez-nous directement, votre message est déjà prêt.",
+    "whatsappButton": "Écrire sur WhatsApp",
+    "phoneTitle": "Téléphone",
+    "callButton": "Appeler",
+    "emailTitle": "E-mail",
+    "emailButton": "Écrire un e-mail",
+    "formTitle": "Envoyer un message",
+    "formSubtitle": "Nous vous répondons par e-mail ou sur WhatsApp, en général sous 24 h (jours ouvrés).",
+    "name": "Nom complet",
+    "email": "Adresse e-mail",
+    "emailHint": "Pour vous répondre.",
+    "phone": "Numéro WhatsApp",
+    "phoneHint": "Exemple : 690000000 ou +237690000000.",
+    "subject": "Sujet",
+    "subjects": {
+      "payment": "Paiement d’une formation",
+      "course": "Question sur une formation",
+      "technical": "Problème technique",
+      "other": "Autre"
+    },
+    "enrollment": "Formation concernée",
+    "enrollmentHint": "Facultatif : nous retrouvons ainsi plus vite votre inscription.",
+    "enrollmentNone": "Aucune en particulier",
+    "message": "Votre message",
+    "messageHint": "{max} caractères maximum.",
+    "send": "Envoyer le message",
+    "sent": "Merci, votre message a bien été envoyé. L’équipe CSC vous répondra rapidement.",
+    "errors": {
+      "rateLimited": "Vous avez envoyé plusieurs messages récemment. Merci de patienter un peu avant d’en envoyer un autre."
+    },
+    "validation": {
+      "messageTooShort": "Votre message est trop court (10 caractères minimum)."
+    },
+    "whatsappHello": "Bonjour CSC, j’ai une question : ",
+    "whatsappHelloNamed": "Bonjour CSC, je suis {name}. J’ai une question : ",
+    "whatsappPayment": "Bonjour CSC, je suis {name}. Je suis inscrit(e) à « {course} » et je souhaite régler ma tranche. Comment dois-je procéder ?"
+  },
+  "adminContact": {
+    "title": "Messages",
+    "subtitle": "{count, plural, =0 {Aucun message à traiter.} one {# message à traiter.} other {# messages à traiter.}}",
+    "settingsTitle": "Coordonnées affichées sur la page Contact",
+    "settingsHint": "Laissez un champ vide pour ne pas l’afficher.",
+    "settingsEmpty": "Aucune coordonnée renseignée : seul le formulaire est proposé aux visiteurs. Ajoutez au moins le numéro WhatsApp.",
+    "whatsapp": "Numéro WhatsApp de CSC",
+    "whatsappHint": "Exemple : 690000000 ou +237690000000. Sert au bouton « Écrire sur WhatsApp » et au bouton « Payer via WhatsApp » des étudiants.",
+    "phone": "Téléphone",
+    "email": "Adresse e-mail de contact",
+    "textHint": "Le texte d’accueil (horaires, délais de réponse) se modifie dans",
+    "textLink": "Contenus",
+    "settingsSave": "Enregistrer les coordonnées",
+    "settingsSaved": "Coordonnées enregistrées.",
+    "viewPage": "Voir la page Contact",
+    "filtersLabel": "Filtrer les messages",
+    "filters": {
+      "open": "À traiter",
+      "done": "Traités",
+      "all": "Tous"
+    },
+    "empty": "Aucun message ici.",
+    "status": {
+      "new": "Nouveau",
+      "in_progress": "En cours",
+      "done": "Traité"
+    },
+    "subjects": {
+      "payment": "Paiement",
+      "course": "Formation",
+      "technical": "Technique",
+      "other": "Autre"
+    },
+    "visitor": "visiteur sans compte",
+    "enrollmentLink": "Inscription : {course} — {session}",
+    "replyWhatsapp": "Répondre sur WhatsApp",
+    "replyWhatsappText": "Bonjour {name}, ici l’équipe CSC. Nous avons bien reçu votre message. ",
+    "replyEmail": "Répondre par e-mail",
+    "replySubject": "Votre message à CSC",
+    "call": "Appeler",
+    "followUp": "Suivi du message",
+    "followUpWithNote": "Suivi du message (note enregistrée)",
+    "statusLabel": "Statut",
+    "note": "Note interne",
+    "noteHint": "Visible des administrateurs seulement.",
+    "save": "Enregistrer",
+    "saved": "Suivi enregistré.",
+    "handledAt": "Dernière mise à jour du suivi : {date}",
+    "limitNotice": "Seuls les {count} messages les plus récents sont affichés."
   }
 }

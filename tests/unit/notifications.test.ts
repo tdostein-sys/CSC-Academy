@@ -27,6 +27,7 @@ const samples: { [K in NotificationType]: TemplateParams[K] } = {
   'academy.commission_paid': { courseTitle: 'Trading', amount: '10 000 FCFA', method: 'Orange Money', reference: 'TX1' },
   'academy.evaluation_opened': { courseTitle: 'Trading' },
   'academy.certificate_issued': { courseTitle: 'Trading', number: 'CSC-2027-00001-AB12' },
+  'contact.new_request': { name: 'Awa Ndiaye', subject: 'payment', excerpt: 'Je veux payer ma tranche.', course: 'Trading (Session 1)' },
 };
 
 describe('modèles de notifications', () => {

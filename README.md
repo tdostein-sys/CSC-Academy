@@ -28,6 +28,7 @@ Stack : **Next.js 16** (App Router, TypeScript, Turbopack) · **React 19** · **
 | [20261119000100_academy_lot2.sql](supabase/migrations/20261119000100_academy_lot2.sql) | Lot 2 : blocage J+3, rappels, commissions, évaluation finale, attestations | ✅ appliqué |
 | [20261120000100_academy_lot3.sql](supabase/migrations/20261120000100_academy_lot3.sql) | Lot 3 : salles de visio, présences, enregistrements (suppression à 7 jours) | ✅ appliqué |
 | [20261121000100_academy_replays.sql](supabase/migrations/20261121000100_academy_replays.sql) | Replays : visionnage unique (2 h par défaut, durée réglable), réinitialisation par l'admin | ✅ appliqué |
+| [20261122000100_contact.sql](supabase/migrations/20261122000100_contact.sql) | Page Contact : coordonnées CSC, messages du formulaire (anti-abus), boîte de réception admin | ✅ appliqué |
 
 Ces fichiers **ne modifient aucune table existante** : ils ajoutent des tables, vues et fonctions `academy_*`. Le lot 2 remplace en plus, par une version étendue, la fonction d'accès aux contenus (blocage J+3), la vue des soldes (colonne `blocked_since` ajoutée) et la fonction appelée après chaque paiement (délivrance de l'attestation).
 
