@@ -36,6 +36,7 @@ export const ACADEMY_ERROR_CODES = [
   'meeting_over',
   'meeting_not_live',
   'live_not_configured',
+  'replay_already_watched',
   'not_found',
   'forbidden',
   'unauthorized',

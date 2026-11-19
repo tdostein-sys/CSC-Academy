@@ -170,7 +170,8 @@
       "meeting_too_early": "La salle pourra être ouverte une heure avant le début de la séance.",
       "meeting_over": "Cette séance est terminée.",
       "meeting_not_live": "La salle n'est pas ouverte. Patientez : l'animateur va bientôt l'ouvrir.",
-      "live_not_configured": "La visio n'est pas encore configurée sur la plateforme."
+      "live_not_configured": "La visio n'est pas encore configurée sur la plateforme.",
+      "replay_already_watched": "Vous avez déjà regardé ce replay : il ne peut être visionné qu’une seule fois."
     },
     "live": {
       "title": "Visio",
@@ -247,7 +248,21 @@
       "devicePermission": "Le navigateur a refusé l'accès à la caméra ou au micro. Cliquez sur le cadenas à gauche de l'adresse du site, autorisez « Caméra » et « Micro », puis rechargez la page.",
       "deviceMissing": "Aucune caméra ou aucun micro n'a été trouvé sur cet appareil. Branchez-en un, puis réessayez.",
       "deviceBusy": "La caméra ou le micro est déjà utilisé par une autre application (Teams, Zoom…) ou un autre onglet. Fermez-la, puis réessayez.",
-      "deviceInsecure": "Le navigateur n'autorise la caméra et le micro que sur une adresse sécurisée (https) ou sur « localhost ». Ouvrez le site par l'une de ces adresses."
+      "deviceInsecure": "Le navigateur n'autorise la caméra et le micro que sur une adresse sécurisée (https) ou sur « localhost ». Ouvrez le site par l'une de ces adresses.",
+      "trainerBadge": "Formateur",
+      "newMessages": "Nouveaux messages",
+      "reactions": "Réactions",
+      "reactionWait": "Patientez une seconde…",
+      "reaction": {
+        "like": "J’aime",
+        "dislike": "Je n’aime pas",
+        "laugh": "Rire",
+        "sad": "Triste",
+        "clap": "Applaudir",
+        "heart": "Cœur",
+        "wow": "Surpris",
+        "party": "Bravo"
+      }
     }
   },
   "auth": {
@@ -918,7 +933,18 @@
     "replaysHint": "Disponibles 7 jours après chaque séance. Une heure de vidéo consomme environ 700 Mo : préférez le Wi-Fi.",
     "replay": "Séance",
     "replayUntil": "Disponible jusqu'au {date}",
-    "watchReplay": "Regarder"
+    "watchReplay": "Regarder",
+    "replayResume": "Reprendre",
+    "replayWatched": "Déjà visionné",
+    "replayConfirm": "Vous ne pourrez lancer ce replay qu’une seule fois. Une fois lancé, vous aurez {hours, plural, one {# heure} other {# heures}} pour le regarder (vous pourrez recharger la page et reprendre la lecture pendant ce délai). Commencer maintenant ?",
+    "replayOnce": "Ce replay ne peut être regardé qu’une seule fois : après le lancement, vous disposez de {hours, plural, one {# heure} other {# heures}} pour le visionner.",
+    "replayWatchedInfo": "Vous avez déjà regardé ce replay et le délai de visionnage est écoulé.",
+    "replayWatchUntil": "Visionnage ouvert jusqu’au {date}. Vous pouvez recharger la page ou reprendre la lecture jusqu’à cette heure.",
+    "replayAdminInfo": "Accès administrateur : visionnage sans limite.",
+    "replayExpired": "Le délai de visionnage est écoulé.",
+    "replayInterrupted": "La lecture s’est interrompue.",
+    "replayRetry": "Relancer la lecture",
+    "replayProtection": "Ce replay est réservé aux inscrits de la formation : merci de ne pas le diffuser."
   },
   "adminAcademy": {
     "saved": "Modifications enregistrées.",
@@ -1120,7 +1146,19 @@
       "watchRecording": "Regarder",
       "deleteRecording": "Supprimer l'enregistrement",
       "deleteRecordingConfirm": "Supprimer définitivement cet enregistrement ? Les étudiants ne pourront plus le regarder.",
-      "recordingDeleted": "Enregistrement supprimé."
+      "recordingDeleted": "Enregistrement supprimé.",
+      "replayViews": "{count, plural, one {# visionnage} other {# visionnages}}",
+      "replayViewStarted": "commencé le {date}",
+      "replayViewActive": "en cours",
+      "replayViewDone": "terminé",
+      "replayReset": "Réinitialiser",
+      "replayResetConfirm": "L’étudiant pourra regarder ce replay une nouvelle fois. Continuer ?",
+      "replayHoursSummary": "Durée de visionnage des replays : {hours, plural, one {# heure} other {# heures}}",
+      "replayHours": "Durée de visionnage d’un replay",
+      "replayHoursHint": "S’applique à toutes les formations, pour les prochains visionnages.",
+      "replayHoursSave": "Enregistrer la durée",
+      "replayHoursSaved": "Durée de visionnage enregistrée.",
+      "hours": "{count, plural, one {# heure} other {# heures}}"
     },
     "enrollments": {
       "title": "Inscrits",

@@ -392,6 +392,30 @@ export async function deleteRecording(_prev: FormState, fd: FormData): Promise<F
   return formSuccess('adminAcademy.session.recordingDeleted');
 }
 
+/** Réinitialise le visionnage d'un étudiant (ex. après un problème technique). */
+export async function resetReplayView(_prev: FormState, fd: FormData): Promise<FormState> {
+  if (!(await adminOrNull())) return formError('errors.forbidden');
+  const parsed = z.object({ recording_id: z.uuid('errors.generic'), user_id: z.uuid('errors.generic') }).safeParse(formDataToObject(fd));
+  if (!parsed.success) return formError('errors.generic');
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('academy_reset_replay_view', { p_recording: parsed.data.recording_id, p_user: parsed.data.user_id });
+  if (error) return formError(academyErrorKey(error));
+  refresh();
+  return formSuccess('adminAcademy.session.replayReset');
+}
+
+/** Durée d'un visionnage de replay, pour toutes les formations (1 à 48 h). */
+export async function setReplayViewHours(_prev: FormState, fd: FormData): Promise<FormState> {
+  if (!(await adminOrNull())) return formError('errors.forbidden');
+  const parsed = z.object({ hours: z.coerce.number().int().min(1, 'errors.generic').max(48, 'errors.generic') }).safeParse(formDataToObject(fd));
+  if (!parsed.success) return formError('errors.generic');
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('academy_set_replay_view_hours', { p_hours: parsed.data.hours });
+  if (error) return formError(academyErrorKey(error));
+  refresh();
+  return formSuccess('adminAcademy.session.replayHoursSaved');
+}
+
 // -----------------------------------------------------------------------------
 // Documents, liens, vidéos
 // -----------------------------------------------------------------------------

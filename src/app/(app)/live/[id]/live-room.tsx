@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { LiveKitRoom, RoomAudioRenderer, StartAudio, VideoTrack, useChat, useConnectionState, useRoomContext, useTracks } from '@livekit/components-react';
+import { LiveKitRoom, RoomAudioRenderer, StartAudio, VideoTrack, useChat, useConnectionState, useDataChannel, useRoomContext, useTracks } from '@livekit/components-react';
 import { ConnectionState, MediaDeviceFailure, RoomEvent, Track, type Participant } from 'livekit-client';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -17,6 +17,7 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import {
+  ArrowDown,
   Hand,
   LogOut,
   Mic,
@@ -31,7 +32,21 @@ import {
 } from 'lucide-react';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Notice } from '@/components/ui/notice';
+import { ChatMessageList, isNearBottom, type ChatItem } from '@/components/live/chat-messages';
+import { ReactionOverlay, ReactionPicker } from '@/components/live/reactions';
 import { ATTR_HAND, ATTR_ROLE, accessFromPermission, canPublishSource, type LiveJoinResult } from '@/lib/academy/live-shared';
+import {
+  REACTIONS,
+  REACTION_COOLDOWN_MS,
+  REACTION_LIFETIME_MS,
+  REACTION_TOPIC,
+  ReactionLimiter,
+  decodeReaction,
+  encodeReaction,
+  pushReaction,
+  type FloatingReaction,
+  type ReactionCode,
+} from '@/lib/academy/reactions';
 import { closeLive, joinLive, lowerHand, muteEveryone, openLive, raiseHand, setParticipantAccess } from '../actions';
 
 type Connection = Extract<LiveJoinResult, { ok: true }>;
@@ -221,6 +236,17 @@ function Stage({ meetingId, isHost, endLabel, deviceNotice }: { meetingId: strin
     prev.current = { mic: hasMic, camera: hasCam };
   }, [isHost, hasMic, hasCam, t]);
 
+  // Réactions emoji : éphémères, via le canal de données LiveKit.
+  const { reactions, react, coolingDown } = useReactions(local.name || '—');
+  const reactionLabels = useMemo(
+    () => ({
+      button: t('reactions'),
+      wait: t('reactionWait'),
+      names: Object.fromEntries(REACTIONS.map((r) => [r.code, t(`reaction.${r.code}`)])) as Record<ReactionCode, string>,
+    }),
+    [t],
+  );
+
   const screen = tracks.find((tr0) => tr0.source === Track.Source.ScreenShare);
   const hostCam = tracks.find((tr0) => tr0.source === Track.Source.Camera && isHostP(tr0.participant));
   const main = screen ?? hostCam;
@@ -287,6 +313,7 @@ function Stage({ meetingId, isHost, endLabel, deviceNotice }: { meetingId: strin
               {main.source === Track.Source.ScreenShare ? ` · ${t('screen')}` : ''}
             </Typography>
           )}
+          <ReactionOverlay items={reactions} />
         </Box>
 
         {/* Caméras autorisées (étudiants, ou animateur pendant un partage d'écran) */}
@@ -341,6 +368,7 @@ function Stage({ meetingId, isHost, endLabel, deviceNotice }: { meetingId: strin
               {handUp ? t('lowerHand') : t('raiseHand')}
             </Button>
           )}
+          <ReactionPicker onPick={react} coolingDown={coolingDown} labels={reactionLabels} />
           <Button variant="outlined" color="secondary" startIcon={<Volume2 aria-hidden size={18} />} aria-pressed={audioOnly} onClick={() => setAudioOnly((v) => !v)}>
             {audioOnly ? t('showVideo') : t('audioOnly')}
           </Button>
@@ -508,16 +536,120 @@ function ParticipantList({
   );
 }
 
+/**
+ * Réactions emoji : envoi limité à 1 par seconde (bouton désactivé), même
+ * limite appliquée à la réception par personne, plafond d'emojis à l'écran.
+ * Le nom affiché vient du participant LiveKit (jeton signé par le serveur),
+ * jamais du contenu du message.
+ */
+function useReactions(myName: string) {
+  const [reactions, setReactions] = useState<FloatingReaction[]>([]);
+  const [coolingDown, setCoolingDown] = useState(false);
+  const limiter = useRef<ReactionLimiter | null>(null);
+  const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  const seq = useRef(0);
+
+  useEffect(() => {
+    const pending = timers.current;
+    return () => {
+      pending.forEach(clearTimeout);
+      pending.clear();
+    };
+  }, []);
+
+  const later = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      timers.current.delete(id);
+      fn();
+    }, ms);
+    timers.current.add(id);
+  }, []);
+
+  const show = useCallback(
+    (code: ReactionCode, name: string) => {
+      seq.current += 1;
+      const id = `r${seq.current}`;
+      setReactions((list) => pushReaction(list, { id, code, name, x: Math.random() }));
+      later(() => setReactions((list) => list.filter((r) => r.id !== id)), REACTION_LIFETIME_MS);
+    },
+    [later],
+  );
+
+  const onMessage = useCallback(
+    (msg: { payload: Uint8Array; from?: Participant }) => {
+      const code = decodeReaction(msg.payload);
+      if (!code || !msg.from) return;
+      limiter.current ??= new ReactionLimiter();
+      if (!limiter.current.allow(msg.from.identity, Date.now())) return;
+      show(code, msg.from.name || '—');
+    },
+    [show],
+  );
+  const { send } = useDataChannel(REACTION_TOPIC, onMessage);
+
+  const react = useCallback(
+    (code: ReactionCode) => {
+      if (coolingDown) return;
+      setCoolingDown(true);
+      later(() => setCoolingDown(false), REACTION_COOLDOWN_MS);
+      show(code, myName);
+      send(encodeReaction(code), { reliable: false, topic: REACTION_TOPIC }).catch(() => {
+        // Réaction perdue (connexion) : sans importance, elle est éphémère.
+      });
+    },
+    [coolingDown, later, myName, send, show],
+  );
+
+  return { reactions, react, coolingDown };
+}
+
 function Chat() {
   const t = useTranslations('academy.live');
   const locale = useLocale();
   const { chatMessages, send, isSending } = useChat();
   const [text, setText] = useState('');
+  const [unread, setUnread] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  // L'utilisateur lit-il le bas du chat ? Sinon, il relit l'historique : on ne le déplace pas.
+  const stick = useRef(true);
+
+  const timeLocale = locale === 'en' ? 'en-GB' : 'fr-FR';
+  const items: ChatItem[] = chatMessages.map((m) => {
+    const d = new Date(m.timestamp);
+    return {
+      id: m.id,
+      author: m.from?.name || '—',
+      time: d.toLocaleTimeString(timeLocale, { hour: '2-digit', minute: '2-digit' }),
+      dateTime: d.toISOString(),
+      text: m.message,
+      mine: Boolean(m.from?.isLocal),
+      host: m.from ? isHostP(m.from) : false,
+    };
+  });
+  const count = items.length;
+  const lastMine = count > 0 && items[count - 1].mine;
+
+  const toBottom = useCallback(() => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight });
+    stick.current = true;
+    setUnread(false);
+  }, []);
 
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
-  }, [chatMessages.length]);
+    if (count === 0) return;
+    // Mon propre message : on descend toujours ; sinon seulement si l'on était en bas.
+    if (stick.current || lastMine) toBottom();
+    else setUnread(true);
+  }, [count, lastMine, toBottom]);
+
+  const onScroll = () => {
+    const el = listRef.current;
+    if (!el) return;
+    stick.current = isNearBottom(el);
+    if (stick.current) setUnread(false);
+  };
 
   const submit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -533,22 +665,24 @@ function Chat() {
 
   return (
     <>
-      <Box ref={listRef} role="log" aria-live="polite" aria-label={t('chat')} sx={{ flex: 1, minHeight: 200, overflowY: 'auto', p: 3, display: 'grid', alignContent: 'start', gap: 2 }}>
-        {chatMessages.length === 0 && (
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {t('chatEmpty')}
-          </Typography>
+      <Box sx={{ position: 'relative', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <ChatMessageList
+          ref={listRef}
+          items={items}
+          onScroll={onScroll}
+          labels={{ title: t('chat'), empty: t('chatEmpty'), host: t('trainerBadge'), you: t('you') }}
+        />
+        {unread && (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={toBottom}
+            startIcon={<ArrowDown aria-hidden size={16} />}
+            sx={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', boxShadow: 3 }}
+          >
+            {t('newMessages')}
+          </Button>
         )}
-        {chatMessages.map((m) => (
-          <Box key={m.id}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              <strong>{m.from?.name ?? '—'}</strong> · {new Date(m.timestamp).toLocaleTimeString(locale === 'en' ? 'en-GB' : 'fr-FR', { hour: '2-digit', minute: '2-digit' })}
-            </Typography>
-            <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
-              {m.message}
-            </Typography>
-          </Box>
-        ))}
       </Box>
       <Box component="form" onSubmit={submit} sx={{ display: 'flex', gap: 2, p: 3, borderTop: 1, borderColor: 'divider' }}>
         <TextField

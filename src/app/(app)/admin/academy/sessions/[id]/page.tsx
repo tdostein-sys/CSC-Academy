@@ -37,8 +37,21 @@ import {
   type SessionOverview,
 } from '@/lib/academy/types';
 import type { Locale } from '@/lib/types';
-import { formatDuration, formatSize } from '@/lib/academy/live-shared';
-import { addDocument, addLinkResource, addMeeting, deleteMeeting, deleteRecording, deleteResource, deleteSession, saveSchedule, setEnrollmentOpen, updateSession } from '../../actions';
+import { formatDuration, formatSize, replayListState } from '@/lib/academy/live-shared';
+import {
+  addDocument,
+  addLinkResource,
+  addMeeting,
+  deleteMeeting,
+  deleteRecording,
+  deleteResource,
+  deleteSession,
+  resetReplayView,
+  saveSchedule,
+  setEnrollmentOpen,
+  setReplayViewHours,
+  updateSession,
+} from '../../actions';
 import { EnrollmentActions } from '../../_components/enrollment-actions';
 import { ScheduleForm } from '../schedule-form';
 import { SessionForm } from '../session-form';
@@ -54,7 +67,17 @@ interface EnrollmentRow {
   ambassadors: { code: string } | null;
 }
 
-const RESOURCE_ICONS = { document: FileText, link: Link2, video: Video } as const;
+interface ReplayViewRow {
+  recording_id: string;
+  user_id: string;
+  started_at: string;
+  expires_at: string;
+  profiles: { first_name: string; last_name: string } | null;
+}
+
+const REPLAY_HOURS = [1, 2, 3, 4, 6, 12, 24, 48];
+
+const RESOURCE_ICONS ={ document: FileText, link: Link2, video: Video } as const;
 
 export default async function AdminSessionPage({
   params,
@@ -113,6 +136,22 @@ export default async function AdminSessionPage({
     : { data: [] };
   const attendance = new Map<string, number>();
   for (const a of (attRows ?? []) as { meeting_id: string }[]) attendance.set(a.meeting_id, (attendance.get(a.meeting_id) ?? 0) + 1);
+  // Visionnages des replays (hors réinitialisés) et durée réglée.
+  const readyIds = recordings.filter((r) => r.status === 'ready').map((r) => r.id);
+  const [{ data: viewRows }, { data: replaySettings }] = await Promise.all([
+    readyIds.length
+      ? supabase
+          .from('academy_replay_views')
+          .select('recording_id, user_id, started_at, expires_at, profiles!academy_replay_views_user_id_fkey (first_name, last_name)')
+          .is('reset_at', null)
+          .in('recording_id', readyIds)
+          .order('started_at')
+      : Promise.resolve({ data: [] }),
+    supabase.from('academy_replay_settings').select('view_hours').maybeSingle(),
+  ]);
+  const replayHours = Number((replaySettings as { view_hours: number } | null)?.view_hours ?? 2);
+  const views = new Map<string, ReplayViewRow[]>();
+  for (const v of (viewRows ?? []) as unknown as ReplayViewRow[]) views.set(v.recording_id, [...(views.get(v.recording_id) ?? []), v]);
 
   const activeBalances = [...balances.values()].filter((b) => b.status !== 'cancelled');
   const collected = activeBalances.reduce((a, b) => a + num(b.paid), 0);
@@ -348,9 +387,9 @@ export default async function AdminSessionPage({
                         </Box>
                         <Box sx={{ display: 'flex', gap: 2 }}>
                           {r.status === 'ready' && (
-                            <Button href={`/student/recordings/${r.id}`} target="_blank" rel="noopener" size="small" variant="outlined" startIcon={<PlayCircle aria-hidden size={16} />}>
+                            <LinkButton href={`/student/replays/${r.id}`} size="small" variant="outlined" startIcon={<PlayCircle aria-hidden size={16} />}>
                               {t('watchRecording')}
-                            </Button>
+                            </LinkButton>
                           )}
                           {r.status !== 'recording' && (
                             <ActionForm action={deleteRecording} confirm={t('deleteRecordingConfirm')} confirmTitle={t('deleteRecording')} confirmLabel={t('deleteRecording')} danger>
@@ -361,6 +400,35 @@ export default async function AdminSessionPage({
                             </ActionForm>
                           )}
                         </Box>
+                        {(views.get(r.id)?.length ?? 0) > 0 && (
+                          <Box sx={{ flexBasis: '100%' }}>
+                            <Collapsible kind="link" summary={t('replayViews', { count: views.get(r.id)?.length ?? 0 })}>
+                              <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0, display: 'grid', gap: 1.5 }}>
+                                {(views.get(r.id) ?? []).map((v) => {
+                                  const state = replayListState(v);
+                                  return (
+                                    <Box component="li" key={v.user_id} sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+                                      <Typography variant="body2">
+                                        <strong>{`${v.profiles?.first_name ?? ''} ${v.profiles?.last_name ?? ''}`.trim() || '—'}</strong>
+                                        {' · '}
+                                        {t('replayViewStarted', { date: formatDate(v.started_at, l, true) })}
+                                        {' · '}
+                                        {state === 'active' ? t('replayViewActive') : t('replayViewDone')}
+                                      </Typography>
+                                      <ActionForm action={resetReplayView} confirm={t('replayResetConfirm')} confirmTitle={t('replayReset')} confirmLabel={t('replayReset')}>
+                                        <input type="hidden" name="recording_id" value={r.id} />
+                                        <input type="hidden" name="user_id" value={v.user_id} />
+                                        <Button type="submit" size="small" variant="outlined" color="secondary">
+                                          {t('replayReset')}
+                                        </Button>
+                                      </ActionForm>
+                                    </Box>
+                                  );
+                                })}
+                              </Box>
+                            </Collapsible>
+                          </Box>
+                        )}
                       </Box>
                     ))}
                   </Box>
@@ -385,6 +453,23 @@ export default async function AdminSessionPage({
               <Button type="submit" variant="contained">
                 {t('addMeeting')}
               </Button>
+            </ActionForm>
+          </Collapsible>
+          <Collapsible kind="link" summary={t('replayHoursSummary', { hours: replayHours })}>
+            <ActionForm action={setReplayViewHours} style={{ display: 'grid', gap: 12, maxWidth: 420 }}>
+              <SelectField
+                name="hours"
+                label={t('replayHours')}
+                hint={t('replayHoursHint')}
+                size="small"
+                defaultValue={String(replayHours)}
+                options={REPLAY_HOURS.map((n) => ({ value: String(n), label: t('hours', { count: n }) }))}
+              />
+              <Box>
+                <Button type="submit" variant="outlined">
+                  {t('replayHoursSave')}
+                </Button>
+              </Box>
             </ActionForm>
           </Collapsible>
         </Stack>

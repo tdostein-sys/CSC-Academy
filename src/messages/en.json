@@ -170,7 +170,8 @@
       "meeting_too_early": "The room can be opened one hour before the session starts.",
       "meeting_over": "This session has ended.",
       "meeting_not_live": "The room is not open yet. Please wait: the host will open it shortly.",
-      "live_not_configured": "Video calls are not configured on the platform yet."
+      "live_not_configured": "Video calls are not configured on the platform yet.",
+      "replay_already_watched": "You have already watched this replay: it can only be viewed once."
     },
     "live": {
       "title": "Video call",
@@ -247,7 +248,21 @@
       "devicePermission": "The browser refused access to the camera or microphone. Click the padlock to the left of the site address, allow “Camera” and “Microphone”, then reload the page.",
       "deviceMissing": "No camera or microphone was found on this device. Plug one in, then try again.",
       "deviceBusy": "The camera or microphone is already used by another application (Teams, Zoom…) or another tab. Close it, then try again.",
-      "deviceInsecure": "The browser only allows the camera and microphone on a secure address (https) or on “localhost”. Open the site through one of these addresses."
+      "deviceInsecure": "The browser only allows the camera and microphone on a secure address (https) or on “localhost”. Open the site through one of these addresses.",
+      "trainerBadge": "Trainer",
+      "newMessages": "New messages",
+      "reactions": "Reactions",
+      "reactionWait": "Wait a second…",
+      "reaction": {
+        "like": "Like",
+        "dislike": "Dislike",
+        "laugh": "Laugh",
+        "sad": "Sad",
+        "clap": "Applause",
+        "heart": "Heart",
+        "wow": "Surprised",
+        "party": "Celebrate"
+      }
     }
   },
   "auth": {
@@ -918,7 +933,18 @@
     "replaysHint": "Available for 7 days after each session. One hour of video uses about 700 MB: prefer Wi-Fi.",
     "replay": "Session",
     "replayUntil": "Available until {date}",
-    "watchReplay": "Watch"
+    "watchReplay": "Watch",
+    "replayResume": "Resume",
+    "replayWatched": "Already watched",
+    "replayConfirm": "You can start this replay only once. Once started, you will have {hours, plural, one {# hour} other {# hours}} to watch it (you can reload the page and resume playback during that time). Start now?",
+    "replayOnce": "This replay can only be watched once: after you start it, you have {hours, plural, one {# hour} other {# hours}} to view it.",
+    "replayWatchedInfo": "You have already watched this replay and the viewing time is over.",
+    "replayWatchUntil": "Viewing open until {date}. You can reload the page or resume playback until then.",
+    "replayAdminInfo": "Administrator access: unlimited viewing.",
+    "replayExpired": "The viewing time is over.",
+    "replayInterrupted": "Playback was interrupted.",
+    "replayRetry": "Restart playback",
+    "replayProtection": "This replay is reserved for students of this course: please do not share it."
   },
   "adminAcademy": {
     "saved": "Changes saved.",
@@ -1120,7 +1146,19 @@
       "watchRecording": "Watch",
       "deleteRecording": "Delete the recording",
       "deleteRecordingConfirm": "Permanently delete this recording? Students will no longer be able to watch it.",
-      "recordingDeleted": "Recording deleted."
+      "recordingDeleted": "Recording deleted.",
+      "replayViews": "{count, plural, one {# view} other {# views}}",
+      "replayViewStarted": "started on {date}",
+      "replayViewActive": "in progress",
+      "replayViewDone": "finished",
+      "replayReset": "Reset",
+      "replayResetConfirm": "The student will be able to watch this replay once more. Continue?",
+      "replayHoursSummary": "Replay viewing time: {hours, plural, one {# hour} other {# hours}}",
+      "replayHours": "Viewing time for a replay",
+      "replayHoursHint": "Applies to all courses, for future views.",
+      "replayHoursSave": "Save viewing time",
+      "replayHoursSaved": "Viewing time saved.",
+      "hours": "{count, plural, one {# hour} other {# hours}}"
     },
     "enrollments": {
       "title": "Enrolled students",

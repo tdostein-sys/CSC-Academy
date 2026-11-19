@@ -72,3 +72,35 @@ export function formatSize(bytes: number | string | null | undefined, locale: 'f
   if (b >= 1e9) return `${fmt(b / 1e9)} ${locale === 'fr' ? 'Go' : 'GB'}`;
   return `${fmt(Math.max(b / 1e6, 0.1))} ${locale === 'fr' ? 'Mo' : 'MB'}`;
 }
+
+// -----------------------------------------------------------------------------
+// Replays : visionnage unique
+// -----------------------------------------------------------------------------
+
+/** État d'un replay pour l'utilisateur, tel que renvoyé par `academy_replay_access`. */
+export type ReplayState = 'admin' | 'active' | 'available' | 'watched';
+
+/** Les seuls états qui donnent droit à un lien de lecture. */
+export const canStream = (state: string | null | undefined): state is 'admin' | 'active' => state === 'admin' || state === 'active';
+
+/** Durée maximale d'un lien de lecture pour l'administrateur (2 h). */
+export const ADMIN_LINK_SECONDS = 2 * 3600;
+/** Plafond technique d'un lien étudiant (la durée réglable va de 1 à 48 h). */
+export const STUDENT_LINK_MAX_SECONDS = 48 * 3600;
+
+/**
+ * Durée de validité (s) d'un nouveau lien de lecture : jusqu'à la fin du droit
+ * de lecture, sans dépasser `maxSeconds`. 0 = délai écoulé, aucun lien.
+ */
+export function linkLifetimeSeconds(until: string | null | undefined, now: number, maxSeconds: number): number {
+  const end = until ? new Date(until).getTime() : NaN;
+  if (!Number.isFinite(end)) return 0;
+  const remaining = Math.floor((end - now) / 1000);
+  return remaining <= 0 ? 0 : Math.min(remaining, maxSeconds);
+}
+
+/** État affiché dans la liste des replays à partir de mon visionnage (s'il existe). */
+export function replayListState(view: { expires_at: string } | null | undefined, now = Date.now()):'available' | 'active' | 'watched' {
+  if (!view) return 'available';
+  return new Date(view.expires_at).getTime() > now ? 'active' : 'watched';
+}

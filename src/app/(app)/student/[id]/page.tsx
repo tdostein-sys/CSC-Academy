@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { ArrowLeft, Award, ClipboardCheck, Download, ExternalLink, FileText, Link2, Lock, PlayCircle, ShieldCheck, Video } from 'lucide-react';
+import { ArrowLeft, Award, ClipboardCheck, Download, ExternalLink, FileText, Link2, Lock, ShieldCheck, Video } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { ActionForm } from '@/components/forms/action-form';
@@ -39,8 +39,9 @@ import {
   type Resource,
 } from '@/lib/academy/types';
 import type { Locale } from '@/lib/types';
-import { formatDuration, formatSize } from '@/lib/academy/live-shared';
+import { formatDuration, formatSize, replayListState } from '@/lib/academy/live-shared';
 import { cancelMyEnrollment } from '../../academy/actions';
+import { ReplayAction } from '../replays/replay-action';
 
 export const metadata: Metadata = { title: 'Ma formation' };
 
@@ -102,6 +103,25 @@ export default async function StudentEnrollmentPage({
   const attempts = (attemptsRes.data ?? []) as Attempt[];
   const certificate = certRes.data as Certificate | null;
   const recordings = (recordingsRes.data ?? []) as Recording[];
+  // Mes visionnages en cours ou terminés (un seul par replay, hors réinitialisation).
+  const { data: viewRows } = recordings.length
+    ? await supabase
+        .from('academy_replay_views')
+        .select('recording_id, expires_at')
+        .eq('user_id', user.id)
+        .is('reset_at', null)
+        .in('recording_id', recordings.map((r) => r.id))
+    : { data: [] };
+  const myViews = new Map(((viewRows ?? []) as { recording_id: string; expires_at: string }[]).map((v) => [v.recording_id, v]));
+  const { data: replaySettings } = recordings.length ? await supabase.from('academy_replay_settings').select('view_hours').maybeSingle() : { data: null };
+  const replayHours = Number((replaySettings as { view_hours: number } | null)?.view_hours ?? 2);
+  const replayLabels = {
+    watch: t('watchReplay'),
+    resume: t('replayResume'),
+    watched: t('replayWatched'),
+    confirm: t('replayConfirm', { hours: replayHours }),
+    confirmTitle: t('watchReplay'),
+  };
   const meetingTitle = new Map(meetings.map((m) => [m.id, localized(l, m.title_fr, m.title_en)]));
 
   const courseTitle = localized(l, s.academy_courses.title_fr, s.academy_courses.title_en);
@@ -282,9 +302,7 @@ export default async function StudentEnrollmentPage({
                         {t('replayUntil', { date: formatDate(r.expires_at, l, true) })}
                       </Typography>
                     </Box>
-                    <Button href={`/student/recordings/${r.id}`} target="_blank" rel="noopener" variant="outlined" startIcon={<PlayCircle aria-hidden size={18} />}>
-                      {t('watchReplay')}
-                    </Button>
+                    <ReplayAction recordingId={r.id} state={replayListState(myViews.get(r.id))} labels={replayLabels} />
                   </Box>
                 ))}
               </Stack>

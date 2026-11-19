@@ -12,7 +12,7 @@ import {
 } from 'livekit-server-sdk';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { presignUrl } from '@/lib/s3-presign';
-import { ATTR_HAND, ATTR_ROLE, recordingObjectKey, studentSources, type StudentAccess } from './live-shared';
+import { ADMIN_LINK_SECONDS, ATTR_HAND, ATTR_ROLE, linkLifetimeSeconds, recordingObjectKey, studentSources, type StudentAccess } from './live-shared';
 
 /*
  * Visio CSC Academy (LiveKit Cloud) et enregistrements (stockage compatible
@@ -256,12 +256,15 @@ export async function reconcileRecordings(): Promise<number> {
 
 const objectPath = (bucket: string, key: string) => `/${bucket}/${key}`;
 
-/** Lien de lecture temporaire (au plus 2 h, jamais au-delà de l'expiration). */
-export function playbackUrl(objectKey: string, expiresAt: string): string | null {
+/**
+ * Lien de lecture temporaire, valable jusqu'à `until` (fin du droit de
+ * lecture) sans dépasser `maxSeconds`. Rien après ce délai.
+ */
+export function playbackUrl(objectKey: string, until: string, maxSeconds = ADMIN_LINK_SECONDS): string | null {
   const st = storageConfig();
   if (!st) return null;
-  const remaining = Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000);
-  if (remaining <= 0) return null;
+  const lifetime = linkLifetimeSeconds(until, Date.now(), maxSeconds);
+  if (lifetime <= 0) return null;
   return presignUrl({
     method: 'GET',
     endpoint: st.endpoint,
@@ -269,7 +272,7 @@ export function playbackUrl(objectKey: string, expiresAt: string): string | null
     region: st.region,
     accessKeyId: st.accessKeyId,
     secretAccessKey: st.secretAccessKey,
-    expiresIn: Math.min(2 * 3600, remaining),
+    expiresIn: lifetime,
     query: { 'response-content-type': 'video/mp4', 'response-content-disposition': 'inline' },
   });
 }
