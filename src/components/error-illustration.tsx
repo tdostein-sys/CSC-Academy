@@ -15,17 +15,17 @@ export function ErrorIllustration({ width = 520 }: { width?: number }) {
   const dark = theme.palette.mode === 'dark';
 
   const blue = c.primary;
-  const blueDeep = dark ? '#3d6fd1' : '#1d5fd6';
-  const sweater = dark ? '#4a86ef' : '#3b7be0';
-  const pants = dark ? '#3a4f8f' : '#1e2f5c';
-  const frame = dark ? '#6e82b0' : '#5b6f99';
-  const screen = dark ? '#1f3260' : '#eef3fc';
-  const blob = dark ? '#16274d' : '#e6edf9';
-  const gear = dark ? '#3a4d78' : '#c9d6ee';
+  const blueDeep = dark ? '#4a82e6' : '#1d5fd6';
+  const sweater = dark ? '#5b93f2' : '#3b7be0';
+  const pants = dark ? '#40568f' : '#1e2f5c';
+  const frame = dark ? '#7a8fbc' : '#5b6f99';
+  const screen = dark ? '#26396a' : '#eef3fc';
+  const blob = dark ? '#1f3157' : '#e6edf9';
+  const gear = dark ? '#40557f' : '#c9d6ee';
   const skin = '#8b5a3c';
   const hair = '#1b1b26';
-  const shoe = dark ? '#e6ecf7' : '#ffffff';
-  const potColor = dark ? '#5d74a8' : '#8fa6d8';
+  const shoe = dark ? '#eef3fc' : '#ffffff';
+  const potColor = dark ? '#6680b8' : '#8fa6d8';
 
   return (
     <svg viewBox="0 0 900 380" width={width} style={{ maxWidth: '100%', height: 'auto' }} aria-hidden="true" focusable="false">

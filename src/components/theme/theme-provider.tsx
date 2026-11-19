@@ -74,6 +74,8 @@ export function AppThemeProvider({
             'html, body': { minHeight: '100%' },
             a: { color: theme.palette.primary.main },
             ':focus-visible': { outline: `2px solid ${theme.palette.primary.main}`, outlineOffset: 2 },
+            // Cases à cocher et boutons radio natifs (questionnaire) : couleur principale du thème.
+            'input[type="checkbox"], input[type="radio"]': { accentColor: theme.palette.primary.main },
             '.sr-only': {
               position: 'absolute',
               width: 1,

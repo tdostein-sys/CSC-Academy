@@ -26,7 +26,15 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
         variant="contained"
         size="large"
         startIcon={<RefreshCw aria-hidden size={20} />}
-        sx={{ px: 7, py: 2, borderRadius: 3, textTransform: 'none', fontSize: '1rem', fontWeight: 600, boxShadow: '0 8px 20px rgba(29,95,214,.3)' }}
+        sx={(theme) => ({
+          px: 7,
+          py: 2,
+          borderRadius: 3,
+          textTransform: 'none',
+          fontSize: '1rem',
+          fontWeight: 600,
+          boxShadow: theme.palette.mode === 'dark' ? '0 8px 20px rgba(110,168,255,.28)' : '0 8px 20px rgba(29,95,214,.3)',
+        })}
       >
         {t('retry')}
       </Button>

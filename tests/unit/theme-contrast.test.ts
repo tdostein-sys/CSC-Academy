@@ -77,3 +77,52 @@ describe.each([
     expect(contrast(vars[fg], vars[bg])).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+/**
+ * Le mode clair est figé : la refonte « chaleureuse » ne concerne que le
+ * mode sombre. Toute modification involontaire du clair fait échouer ce test.
+ */
+describe('mode clair inchangé', () => {
+  it('jetons du thème clair identiques à la version validée', () => {
+    expect(tokens.light).toEqual({
+      bg: '#ffffff',
+      surface: '#f3f6fb',
+      'surface-2': '#e9eff8',
+      border: '#e0e6f0',
+      text: '#16213a',
+      muted: '#53627c',
+      primary: '#1d5fd6',
+      'primary-hover': '#174fb5',
+      'primary-fg': '#ffffff',
+      'primary-soft': '#e6effd',
+      secondary: '#5b3fc4',
+      'secondary-fg': '#ffffff',
+      accent: '#f5c211',
+      'accent-hover': '#e0b00c',
+      'accent-fg': '#1a1500',
+      'accent-soft': '#fdf3c8',
+      success: '#15803d',
+      'success-soft': '#dcfce7',
+      warning: '#a14b06',
+      'warning-soft': '#fef3c7',
+      error: '#c81e1e',
+      'error-soft': '#fee2e2',
+      info: '#5b3fc4',
+      'info-soft': '#ede9fe',
+      'on-status': '#ffffff',
+      'nav-bg': '#0f1c3f',
+      'nav-text': '#e6ecf7',
+      'nav-muted': '#9aabc9',
+      'nav-hover': '#1a2a52',
+      'nav-active-from': '#1d5fd6',
+      'nav-active-to': '#2f6fe4',
+      'nav-active-fg': '#ffffff',
+    });
+  });
+
+  it('mode sombre : cartes nettement détachées du fond de page', () => {
+    // Écart de luminosité entre carte et fond (lisibilité des blocs).
+    expect(contrast(tokens.dark.bg, tokens.dark.surface)).toBeGreaterThanOrEqual(1.15);
+    expect(contrast(tokens.dark['surface-2'], tokens.dark.bg)).toBeGreaterThanOrEqual(1.15);
+  });
+});

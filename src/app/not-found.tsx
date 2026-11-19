@@ -8,7 +8,7 @@ import { LinkButton } from '@/components/ui/links';
 export default async function NotFound() {
   const [t, ts] = await Promise.all([getTranslations('errors'), getTranslations('soon')]);
   return (
-    <Box component="main" sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', p: 5 }}>
+    <Box component="main" sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', p: 5, bgcolor: 'background.default', color: 'text.primary' }}>
       <Typography variant="h1" component="p" aria-hidden sx={{ fontWeight: 700, color: 'primary.main', fontSize: { xs: '4rem', sm: '6rem' } }}>
         404
       </Typography>

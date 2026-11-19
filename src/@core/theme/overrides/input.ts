@@ -76,7 +76,21 @@ const input = () => {
           },
           '&.MuiInputBase-colorInfo.Mui-focused': {
             boxShadow: `0 1px 3px 0 ${hexToRGBA(theme.palette.info.main, 0.4)}`
-          }
+          },
+          // Sombre uniquement : champ en léger creux (fond de page) et contour
+          // plus visible, pour bien distinguer les champs des cartes.
+          ...(theme.palette.mode === 'dark' && {
+            backgroundColor: theme.palette.customColors.bodyBg,
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: `rgba(${theme.palette.customColors.main}, 0.34)`
+            },
+            '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
+              borderColor: `rgba(${theme.palette.customColors.main}, 0.56)`
+            },
+            '&.Mui-disabled': {
+              backgroundColor: 'transparent'
+            }
+          })
         }),
         colorSecondary: ({ theme }: OwnerStateThemeType) => ({
           '&.Mui-focused': {

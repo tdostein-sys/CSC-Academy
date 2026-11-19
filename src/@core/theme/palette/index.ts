@@ -11,7 +11,8 @@ const DefaultPalette = (mode: Palette['mode'], settings: Settings): Palette => {
   const c = tokens[mode === 'dark' ? 'dark' : 'light']
   const whiteColor = '#FFF'
   const lightColor = '22, 33, 58'
-  const darkColor = '230, 236, 247'
+  // Sombre : blanc bleuté (lignes, survols, champs) accordé au texte #eef3fc.
+  const darkColor = '238, 243, 252'
   const mainColor = mode === 'light' ? lightColor : darkColor
   const bordered = settings.skin === 'bordered'
 
@@ -27,7 +28,7 @@ const DefaultPalette = (mode: Palette['mode'], settings: Settings): Palette => {
       trackBg: c['surface-2'],
       avatarBg: c['surface-2'],
       tableHeaderBg: c['surface-2'],
-      tooltipBg: mode === 'light' ? '#262732' : '#464A65'
+      tooltipBg: mode === 'light' ? '#262732' : '#3a4c72'
     },
     mode: mode,
     common: {

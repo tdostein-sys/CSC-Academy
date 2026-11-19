@@ -19,8 +19,9 @@ export function AuthBackdrop({ children }: { children: ReactNode }) {
           minHeight: '100dvh',
           overflow: 'hidden',
           bgcolor: c.surface,
+          color: c.text,
           backgroundImage: dark
-            ? 'radial-gradient(1200px 600px at 10% -10%, rgba(29,95,214,.35), transparent 60%), radial-gradient(900px 500px at 110% 110%, rgba(91,63,196,.30), transparent 60%)'
+            ? 'radial-gradient(1200px 600px at 10% -10%, rgba(110,168,255,.30), transparent 60%), radial-gradient(900px 500px at 110% 110%, rgba(196,181,253,.22), transparent 60%)'
             : 'radial-gradient(1200px 600px at 10% -10%, rgba(29,95,214,.16), transparent 60%), radial-gradient(900px 500px at 110% 110%, rgba(91,63,196,.14), transparent 60%)',
         };
       }}

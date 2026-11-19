@@ -225,7 +225,10 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
   );
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
+    // Fond et couleur de texte posés ici (et pas seulement sur <body>) : après un
+    // changement de thème sans rechargement, le style global du rendu serveur
+    // restait prioritaire (page blanche en mode sombre, titres illisibles).
+    <Box sx={{ display: 'flex', minHeight: '100dvh', bgcolor: 'background.default', color: 'text.primary' }}>
       <a href="#contenu" className="sr-only">
         {ts('skipToContent')}
       </a>

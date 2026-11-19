@@ -17,7 +17,8 @@ const Menu = (skin: Skin) => {
         root: ({ theme }: OwnerStateThemeType) => ({
           '& .MuiMenu-paper': {
             boxShadow: boxShadow(theme),
-            ...(skin === 'bordered' && { border: `1px solid ${theme.palette.divider}` })
+            // Sombre : liseré pour détacher le menu de la page.
+            ...((skin === 'bordered' || theme.palette.mode === 'dark') && { border: `1px solid ${theme.palette.divider}` })
           }
         }),
         list: ({ theme }: OwnerStateThemeType) => ({
