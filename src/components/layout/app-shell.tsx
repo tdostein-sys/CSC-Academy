@@ -41,6 +41,7 @@ import {
   MessageCircle,
   Send,
   Shield,
+  TrendingUp,
   User,
   Users,
   X,
@@ -136,6 +137,7 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
           {
             title: t('admin'),
             items: [
+              { href: '/admin/dashboard', label: ta('dashboard'), Icon: TrendingUp },
               { href: '/admin', label: ta('overview'), Icon: Shield, exact: true },
               { href: '/admin/ambassador', label: ta('ambassador'), Icon: Megaphone },
               { href: '/admin/academy', label: ta('academy'), Icon: GraduationCap },
