@@ -13,7 +13,7 @@ import { Notice } from '@/components/ui/notice';
 
 export const metadata: Metadata = { title: 'Mon profil' };
 
-/** Profil : mise en page Â« ParamÃ¨tres du compte Â» de Sneat. */
+/** Profil : mise en page « Paramètres du compte » de Sneat. */
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ password?: string }> }) {
   const user = await requireUser('/profile');
   const [t, sp] = await Promise.all([getTranslations('profile'), searchParams]);

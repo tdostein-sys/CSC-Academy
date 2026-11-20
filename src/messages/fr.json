@@ -29,9 +29,9 @@
     "next": "Suivant",
     "search": "Rechercher",
     "noResults": "Aucun résultat.",
-    "charCount": "{count} caractÃ¨res",
-    "charCountMin": "{count} / {min} caractÃ¨res minimum",
-    "charCountMax": "{count} / {max} caractÃ¨res"
+    "charCount": "{count} caractères",
+    "charCountMin": "{count} / {min} caractères minimum",
+    "charCountMax": "{count} / {max} caractères"
   },
   "nav": {
     "home": "Accueil",
@@ -331,23 +331,23 @@
     "linkInvalid": "Ce lien est invalide ou a expiré. Faites une nouvelle demande.",
     "emailConfirmed": "Votre adresse e-mail est confirmée. Vous pouvez vous connecter.",
     "hidePassword": "Masquer le mot de passe",
-    "remember": "Rester connectÃ© sur cet appareil",
-    "backToHome": "Retour Ã  lâ€™accueil",
-    "backToProfile": "Retour Ã  mon profil",
+    "remember": "Rester connecté sur cet appareil",
+    "backToHome": "Retour à l’accueil",
+    "backToProfile": "Retour à mon profil",
     "currentPassword": "Mot de passe actuel",
-    "currentPasswordForcedHint": "Le mot de passe provisoire qui vous a Ã©tÃ© communiquÃ©.",
-    "currentPasswordWrong": "Mot de passe actuel incorrect. VÃ©rifiez la saisie (majuscules, clavier) ou utilisez Â« Mot de passe oubliÃ© Â».",
+    "currentPasswordForcedHint": "Le mot de passe provisoire qui vous a été communiqué.",
+    "currentPasswordWrong": "Mot de passe actuel incorrect. Vérifiez la saisie (majuscules, clavier) ou utilisez « Mot de passe oublié ».",
     "changeOwnTitle": "Changer mon mot de passe",
-    "changeOwnSubtitle": "Saisissez votre mot de passe actuel, puis le nouveau. Vos autres appareils seront dÃ©connectÃ©s.",
-    "loggedOutIdle": "Vous avez Ã©tÃ© dÃ©connectÃ© aprÃ¨s {minutes} minutes dâ€™inactivitÃ©, pour protÃ©ger votre compte. Reconnectez-vous pour continuer.",
-    "loggedOutExpired": "Par sÃ©curitÃ©, une session dure au plus {days} jours. Reconnectez-vous pour continuer.",
+    "changeOwnSubtitle": "Saisissez votre mot de passe actuel, puis le nouveau. Vos autres appareils seront déconnectés.",
+    "loggedOutIdle": "Vous avez été déconnecté après {minutes} minutes d’inactivité, pour protéger votre compte. Reconnectez-vous pour continuer.",
+    "loggedOutExpired": "Par sécurité, une session dure au plus {days} jours. Reconnectez-vous pour continuer.",
     "passwordRules": {
-      "title": "RÃ¨gles du mot de passe",
-      "length": "8 caractÃ¨res minimum",
+      "title": "Règles du mot de passe",
+      "length": "8 caractères minimum",
       "letter": "Au moins une lettre",
       "digit": "Au moins un chiffre",
-      "met": "rÃ¨gle respectÃ©e",
-      "unmet": "rÃ¨gle non respectÃ©e",
+      "met": "règle respectée",
+      "unmet": "règle non respectée",
       "match": "Les deux mots de passe correspondent",
       "noMatch": "Les deux mots de passe ne correspondent pas",
       "strength0": "Robustesse",
@@ -418,7 +418,7 @@
     "notFoundBody": "La page demandée n'existe pas ou a été déplacée.",
     "errorTitle": "Oups, un problème est survenu",
     "retry": "Réessayer",
-    "backHome": "Retour Ã  lâ€™accueil"
+    "backHome": "Retour à l’accueil"
   },
   "dashboard": {
     "title": "Mon espace",
@@ -475,7 +475,7 @@
     "securityTitle": "Sécurité",
     "changePassword": "Changer mon mot de passe",
     "passwordChanged": "Mot de passe modifié.",
-    "passwordChangedOthers": "Votre mot de passe a Ã©tÃ© modifiÃ©. Vos autres appareils ont Ã©tÃ© dÃ©connectÃ©s."
+    "passwordChangedOthers": "Votre mot de passe a été modifié. Vos autres appareils ont été déconnectés."
   },
   "notifications": {
     "title": "Notifications",
@@ -2303,9 +2303,9 @@
     }
   },
   "session": {
-    "warningTitle": "Toujours lÃ  ?",
-    "warningBody": "Sans activitÃ© de votre part, vous allez Ãªtre dÃ©connectÃ© dans {countdown}, pour protÃ©ger votre compte.",
-    "stay": "Rester connectÃ©",
-    "logoutNow": "Me dÃ©connecter"
+    "warningTitle": "Toujours là ?",
+    "warningBody": "Sans activité de votre part, vous allez être déconnecté dans {countdown}, pour protéger votre compte.",
+    "stay": "Rester connecté",
+    "logoutNow": "Me déconnecter"
   }
 }
