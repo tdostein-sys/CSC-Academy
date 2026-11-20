@@ -32,7 +32,9 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const [profileRes, adminRes, unreadRes, ambassadorRes, advisorRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', claims.sub).single(),
     supabase.rpc('is_admin'),
-    supabase.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null),
+    // Filtre explicite sur l'utilisateur : l'admin peut LIRE toutes les
+    // notifications (supervision des envois), mais son compteur ne compte que les siennes.
+    supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', claims.sub).is('read_at', null),
     supabase.from('ambassadors').select('code, status').eq('user_id', claims.sub).maybeSingle(),
     supabase.rpc('consulting_is_advisor'),
   ]);

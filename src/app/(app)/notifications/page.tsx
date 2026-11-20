@@ -6,24 +6,26 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { BellOff, CheckCheck } from 'lucide-react';
+import { BellOff, Check, CheckCheck } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { formatDate } from '@/lib/format';
 import { PageHeader } from '@/components/page-header';
 import { StatusBadge } from '@/components/status-badge';
 import type { Locale, NotificationRow } from '@/lib/types';
-import { markAllNotificationsRead } from './actions';
-import { LinkButton } from '@/components/ui/links';
+import { markAllNotificationsRead, markNotificationRead, openNotification } from './actions';
 
 export const metadata: Metadata = { title: 'Notifications' };
 
 export default async function NotificationsPage() {
   const user = await requireUser('/notifications');
   const [t, locale, supabase] = await Promise.all([getTranslations('notifications'), getLocale(), createClient()]);
+  // Uniquement MES notifications : l'admin a aussi le droit de lire celles des
+  // autres (supervision des envois), qui n'ont pas leur place ici.
   const { data } = await supabase
     .from('notifications')
     .select('id, type, title, body, link, read_at, created_at')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(100);
   const items = (data ?? []) as NotificationRow[];
@@ -63,13 +65,27 @@ export default async function NotificationsPage() {
                 <Typography variant="body2" sx={{ mt: 1, whiteSpace: 'pre-line', color: 'text.secondary' }}>
                   {n.body}
                 </Typography>
-                <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: 'text.secondary' }}>
+                <Box sx={{ mt: 3, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
                   <time dateTime={n.created_at}>{formatDate(n.created_at, locale as Locale, true)}</time>
-                  {n.link && (
-                    <LinkButton href={n.link} size="small">
-                      {t('open')} →
-                    </LinkButton>
-                  )}
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {!n.read_at && (
+                      <form action={markNotificationRead}>
+                        <input type="hidden" name="id" value={n.id} />
+                        <Button type="submit" size="small" variant="text" startIcon={<Check aria-hidden size={16} />}>
+                          {t('markRead')}
+                        </Button>
+                      </form>
+                    )}
+                    {/* « Ouvrir » marque la notification comme lue, puis ouvre la page liée. */}
+                    {n.link && (
+                      <form action={openNotification}>
+                        <input type="hidden" name="id" value={n.id} />
+                        <Button type="submit" size="small" variant="outlined">
+                          {t('open')} →
+                        </Button>
+                      </form>
+                    )}
+                  </Box>
                 </Box>
               </CardContent>
             </Card>
