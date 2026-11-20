@@ -1786,6 +1786,23 @@
       "reportPublished": "Report published, client notified.",
       "fileAdded": "Document attached.",
       "fileRemoved": "Document removed."
+    },
+    "calendar": {
+      "view": "Appointments display",
+      "calendar": "Calendar",
+      "list": "List",
+      "today": "Today",
+      "month": "Month",
+      "week": "Week",
+      "day": "Day",
+      "listView": "List",
+      "noEvents": "No appointments in this period.",
+      "legend": {
+        "confirmed": "Confirmed",
+        "pending": "Awaiting payment",
+        "done": "Done",
+        "unavailable": "Unavailable"
+      }
     }
   },
   "adminConsulting": {

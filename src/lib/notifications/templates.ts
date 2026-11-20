@@ -38,6 +38,8 @@ export interface TemplateParams {
   'consulting.reminder_day': { offerTitle: string; date: string; mode: ConsultingModeLabel; location: string };
   'consulting.reminder_hour': { offerTitle: string; date: string; mode: ConsultingModeLabel; location: string };
   'consulting.reminder_staff': { clientName: string; offerTitle: string; date: string; mode: ConsultingModeLabel; phone: string };
+  'consulting.reminder_soon': { offerTitle: string; time: string; mode: ConsultingModeLabel; location: string };
+  'consulting.reminder_soon_staff': { clientName: string; offerTitle: string; time: string; mode: ConsultingModeLabel; phone: string; location: string };
   'consulting.report_published': { offerTitle: string; date: string };
   'consulting.refunded': { offerTitle: string; amount: string; reference: string };
 }
@@ -415,6 +417,31 @@ const templates: Templates = {
     en: (p) => ({
       title: `Upcoming consultation: ${p.clientName}`,
       body: `Consultation "${p.offerTitle}" with ${p.clientName} on ${p.date} (${CONSULTING_MODE_NAMES.en[p.mode]}${p.mode === 'phone' ? `, call on ${p.phone}` : ''}).`,
+    }),
+  },
+  // Rappel « juste avant » : 15 min avant (visio, appel), 1 h avant (présentiel).
+  'consulting.reminder_soon': {
+    fr: (p) => ({
+      title: p.mode === 'in_person' ? `Votre rendez-vous commence dans 1 heure` : `Votre rendez-vous commence dans 15 minutes`,
+      body: `Votre rendez-vous « ${p.offerTitle} » commence à ${p.time}, ${CONSULTING_WHERE.fr(p.mode, p.location)}.`,
+    }),
+    en: (p) => ({
+      title: p.mode === 'in_person' ? `Your appointment starts in 1 hour` : `Your appointment starts in 15 minutes`,
+      body: `Your appointment "${p.offerTitle}" starts at ${p.time}, ${CONSULTING_WHERE.en(p.mode, p.location)}.`,
+    }),
+  },
+  'consulting.reminder_soon_staff': {
+    fr: (p) => ({
+      title: `${p.mode === 'in_person' ? 'Dans 1 heure' : 'Dans 15 minutes'} : consultation avec ${p.clientName}`,
+      body: `Consultation « ${p.offerTitle} » avec ${p.clientName} à ${p.time} (${CONSULTING_MODE_NAMES.fr[p.mode]}${
+        p.mode === 'phone' ? `, à appeler au ${p.phone}` : p.mode === 'in_person' && p.location ? `, ${p.location}` : ''
+      }).${p.mode === 'video' ? ' La salle de visio est déjà ouverte dans « Consultations ».' : ''}`,
+    }),
+    en: (p) => ({
+      title: `${p.mode === 'in_person' ? 'In 1 hour' : 'In 15 minutes'}: consultation with ${p.clientName}`,
+      body: `Consultation "${p.offerTitle}" with ${p.clientName} at ${p.time} (${CONSULTING_MODE_NAMES.en[p.mode]}${
+        p.mode === 'phone' ? `, call on ${p.phone}` : p.mode === 'in_person' && p.location ? `, ${p.location}` : ''
+      }).${p.mode === 'video' ? ' The video room is already open in "Consultations".' : ''}`,
     }),
   },
   'consulting.report_published': {

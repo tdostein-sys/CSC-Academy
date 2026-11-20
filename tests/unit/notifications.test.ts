@@ -41,6 +41,8 @@ const samples: { [K in NotificationType]: TemplateParams[K] } = {
   'consulting.report_published': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00' },
   'consulting.refunded': { offerTitle: 'Bilan', amount: '25 000 FCFA', reference: 'RB-1' },
   'account.password_changed': { date: '20 novembre 2026 à 15:00' },
+  'consulting.reminder_soon': { offerTitle: 'Bilan', time: '10:00', mode: 'video', location: '' },
+  'consulting.reminder_soon_staff': { clientName: 'Awa N.', offerTitle: 'Bilan', time: '10:00', mode: 'phone', phone: '+237690000000', location: '' },
 };
 
 describe('modèles de notifications', () => {

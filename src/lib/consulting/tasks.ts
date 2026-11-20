@@ -4,14 +4,15 @@ import { notify } from '@/lib/notifications';
 import { formatDate } from '@/lib/format';
 import { localized } from '@/lib/localized';
 import { bookingContext, staffIds } from './notify';
-import type { ConsultingMode } from './types';
+import { doualaTime, type ConsultingMode } from './types';
 
 /**
- * Tâches planifiées CSC Consulting (appelées toutes les 15 minutes par
+ * Tâches planifiées CSC Consulting (appelées toutes les 5 à 15 minutes par
  * /api/cron/frequent, et une fois par jour par /api/cron/notifications) :
  *  1. expire les rendez-vous payants non réglés dans le délai (créneau libéré) ;
  *  2. prévient chaque client concerné, une seule fois ;
- *  3. envoie les rappels « la veille » et « 1 h avant » (client et conseiller).
+ *  3. envoie les rappels « la veille » puis « juste avant » : 15 min avant une
+ *     visio ou un appel, 1 h avant une rencontre en présentiel (client et conseiller).
  * La base choisit ce qui est dû et garantit qu'aucun envoi n'est réservé deux
  * fois : la tâche peut être relancée sans doublon.
  */
@@ -23,7 +24,7 @@ export interface ConsultingTaskResult {
 
 interface ReminderRow {
   booking_id: string;
-  kind: 'day_before' | 'hour_before';
+  kind: 'day_before' | 'soon';
   client_id: string;
   advisor_id: string;
   starts_at: string;
@@ -65,41 +66,40 @@ export async function runConsultingTasks(): Promise<ConsultingTaskResult> {
   if (remErr) throw new Error(`rappels: ${remErr.message}`);
   for (const r of (reminders ?? []) as ReminderRow[]) {
     const title = (l: 'fr' | 'en') => localized(l, r.offer_title_fr, r.offer_title_en);
-    await notify({
-      userIds: [r.client_id],
-      type: r.kind === 'day_before' ? 'consulting.reminder_day' : 'consulting.reminder_hour',
-      params: (l) => ({ offerTitle: title(l), date: formatDate(r.starts_at, l, true), mode: r.mode, location: r.location }),
-      link: `/consulting/bookings/${r.booking_id}`,
-    });
-    // L'équipe est prévenue une fois, la veille (ou 1 h avant si réservé tardivement).
-    if (r.kind === 'day_before' || !(await hadDayBefore(r.booking_id))) {
-      const c = await bookingContext(r.booking_id);
+    const c = await bookingContext(r.booking_id);
+    if (r.kind === 'day_before') {
+      // La veille : le client, puis le conseiller et l'administration.
+      await notify({
+        userIds: [r.client_id],
+        type: 'consulting.reminder_day',
+        params: (l) => ({ offerTitle: title(l), date: formatDate(r.starts_at, l, true), mode: r.mode, location: r.location }),
+        link: `/consulting/bookings/${r.booking_id}`,
+      });
       await notify({
         userIds: await staffIds(r.advisor_id),
         type: 'consulting.reminder_staff',
-        params: (l) => ({
-          clientName: c?.clientName ?? '—',
-          offerTitle: title(l),
-          date: formatDate(r.starts_at, l, true),
-          mode: r.mode,
-          phone: c?.clientPhone ?? '',
-        }),
+        params: (l) => ({ clientName: c?.clientName ?? '—', offerTitle: title(l), date: formatDate(r.starts_at, l, true), mode: r.mode, phone: c?.clientPhone ?? '' }),
+        link: `/consulting/manage/${r.booking_id}`,
+      });
+    } else {
+      // Juste avant (15 min pour visio / appel, 1 h en présentiel) : le client ET son conseiller, par e-mail et dans l'application.
+      const time = doualaTime(r.starts_at);
+      await notify({
+        userIds: [r.client_id],
+        type: 'consulting.reminder_soon',
+        params: (l) => ({ offerTitle: title(l), time, mode: r.mode, location: r.location }),
+        link: `/consulting/bookings/${r.booking_id}`,
+      });
+      await notify({
+        userIds: [r.advisor_id],
+        type: 'consulting.reminder_soon_staff',
+        params: (l) => ({ clientName: c?.clientName ?? '—', offerTitle: title(l), time, mode: r.mode, phone: c?.clientPhone ?? '', location: r.location }),
         link: `/consulting/manage/${r.booking_id}`,
       });
     }
     result.reminders += 1;
   }
   return result;
-}
-
-async function hadDayBefore(bookingId: string): Promise<boolean> {
-  const { data } = await createAdminClient()
-    .from('consulting_reminders')
-    .select('kind')
-    .eq('booking_id', bookingId)
-    .eq('kind', 'day_before')
-    .maybeSingle();
-  return Boolean(data);
 }
 
 /**

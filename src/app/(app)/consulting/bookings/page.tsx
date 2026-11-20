@@ -11,15 +11,20 @@ import { formatDate, formatXAF } from '@/lib/format';
 import { localized } from '@/lib/localized';
 import { bookingRef, num, type BookingDetails } from '@/lib/consulting/types';
 import type { Locale } from '@/lib/types';
+import Card from '@mui/material/Card';
+import { BookingCalendarLazy } from '@/components/consulting/booking-calendar-lazy';
+import { CalendarViewSwitch, calendarLabels, type CalendarView } from '@/components/consulting/calendar-view';
+import { toCalendarBookings } from '@/lib/consulting/calendar';
 
 export const metadata: Metadata = { title: 'Mes rendez-vous' };
 export const dynamic = 'force-dynamic';
 
-/** Rendez-vous du client connecté (la vue ne renvoie que les siens). */
-export default async function MyBookingsPage() {
+/** Rendez-vous du client connecté (la vue ne renvoie que les siens) : calendrier ou liste. */
+export default async function MyBookingsPage({ searchParams }: { searchParams: Promise<{ vue?: string }> }) {
   const user = await requireUser('/consulting/bookings');
-  const [t, locale, supabase] = await Promise.all([getTranslations('consulting'), getLocale(), createClient()]);
+  const [t, locale, supabase, { vue }] = await Promise.all([getTranslations('consulting'), getLocale(), createClient(), searchParams]);
   const l = locale as Locale;
+  const view: CalendarView = vue === 'liste' ? 'liste' : 'calendrier';
 
   const { data } = await supabase
     .from('consulting_booking_details')
@@ -40,8 +45,13 @@ export default async function MyBookingsPage() {
           </LinkButton>
         }
       />
+      {rows.length > 0 && <CalendarViewSwitch basePath="/consulting/bookings" view={view} />}
       {rows.length === 0 ? (
         <EmptyCard>{t('bookings.empty')}</EmptyCard>
+      ) : view === 'calendrier' ? (
+        <Card sx={{ p: { xs: 3, sm: 5 } }}>
+          <BookingCalendarLazy bookings={toCalendarBookings(rows, 'client', l)} locale={l} labels={await calendarLabels()} />
+        </Card>
       ) : (
         <TableCard head={[t('bookings.date'), t('bookings.offer'), t('bookings.mode'), t('bookings.price'), t('bookings.status'), t('bookings.report')]}>
           {rows.map((r) => (

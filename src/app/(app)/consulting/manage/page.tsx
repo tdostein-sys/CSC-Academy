@@ -12,6 +12,11 @@ import { formatDate, formatXAF } from '@/lib/format';
 import { localized } from '@/lib/localized';
 import { bookingRef, num, type BookingDetails } from '@/lib/consulting/types';
 import type { Locale } from '@/lib/types';
+import Card from '@mui/material/Card';
+import { BookingCalendarLazy } from '@/components/consulting/booking-calendar-lazy';
+import { CalendarViewSwitch, calendarLabels, type CalendarView } from '@/components/consulting/calendar-view';
+import { CALENDAR_STATUSES, calendarWindow, toCalendarBookings } from '@/lib/consulting/calendar';
+import { parseTstzRange } from '@/lib/consulting/range';
 
 export const metadata: Metadata = { title: 'Consultations' };
 export const dynamic = 'force-dynamic';
@@ -23,13 +28,52 @@ type Filter = (typeof FILTERS)[number];
  * Rendez-vous à traiter : le conseiller voit ceux qui lui sont attribués,
  * l'administrateur tous (filtrage par la vue, côté base).
  */
-export default async function ManageBookingsPage({ searchParams }: { searchParams: Promise<{ f?: string }> }) {
+export default async function ManageBookingsPage({ searchParams }: { searchParams: Promise<{ f?: string; vue?: string }> }) {
   const user = await requireConsultingStaff();
-  const { f } = await searchParams;
+  const { f, vue } = await searchParams;
   const filter: Filter = (FILTERS as readonly string[]).includes(f ?? '') ? (f as Filter) : 'upcoming';
+  const view: CalendarView = vue === 'liste' ? 'liste' : 'calendrier';
   const [t, locale, supabase] = await Promise.all([getTranslations('consulting'), getLocale(), createClient()]);
   const l = locale as Locale;
   const now = new Date().toISOString();
+
+  // ---- Calendrier : rendez-vous actifs sur 8 mois, créneaux habituels et indisponibilités du conseiller connecté.
+  if (view === 'calendrier') {
+    const win = calendarWindow();
+    const [{ data: calData }, { data: hours }, { data: unav }, labels] = await Promise.all([
+      supabase
+        .from('consulting_booking_details')
+        .select('id, ref, offer_title_fr, offer_title_en, starts_at, ends_at, status, client_first_name, client_last_name, advisor_name')
+        .in('status', [...CALENDAR_STATUSES])
+        .gte('ends_at', win.from)
+        .lte('starts_at', win.to)
+        .order('starts_at')
+        .limit(1000),
+      supabase.from('consulting_availability').select('weekday, start_time, end_time').eq('advisor_id', user.id),
+      supabase.from('consulting_unavailabilities').select('period').eq('advisor_id', user.id),
+      calendarLabels(),
+    ]);
+    const blocks = ((unav ?? []) as { period: string }[]).flatMap((u) => {
+      const r = parseTstzRange(u.period);
+      return r ? [{ start: r[0], end: r[1] }] : [];
+    });
+    const businessHours = ((hours ?? []) as { weekday: number; start_time: string; end_time: string }[]).map((h) => ({ weekday: h.weekday, start: h.start_time, end: h.end_time }));
+    return (
+      <>
+        <PageHeader title={t('manage.title')} subtitle={user.isAdmin ? t('manage.subtitleAdmin') : t('manage.subtitleAdvisor')} />
+        <CalendarViewSwitch basePath="/consulting/manage" view={view} />
+        <Card sx={{ p: { xs: 3, sm: 5 } }}>
+          <BookingCalendarLazy
+            bookings={toCalendarBookings((calData ?? []) as BookingDetails[], 'staff', l, { showAdvisor: user.isAdmin })}
+            blocks={blocks}
+            businessHours={businessHours.length ? businessHours : undefined}
+            locale={l}
+            labels={labels}
+          />
+        </Card>
+      </>
+    );
+  }
 
   let query = supabase
     .from('consulting_booking_details')
@@ -44,9 +88,10 @@ export default async function ManageBookingsPage({ searchParams }: { searchParam
   return (
     <>
       <PageHeader title={t('manage.title')} subtitle={user.isAdmin ? t('manage.subtitleAdmin') : t('manage.subtitleAdvisor')} />
+      <CalendarViewSwitch basePath="/consulting/manage" view={view} />
       <FilterPills
         label={t('manage.filter')}
-        items={FILTERS.map((k) => ({ key: k, href: `/consulting/manage?f=${k}`, label: t(`manage.filters.${k}`), active: k === filter }))}
+        items={FILTERS.map((k) => ({ key: k, href: `/consulting/manage?vue=liste&f=${k}`, label: t(`manage.filters.${k}`), active: k === filter }))}
       />
       {rows.length === 0 ? (
         <EmptyCard>{t('manage.empty')}</EmptyCard>

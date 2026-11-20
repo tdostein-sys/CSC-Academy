@@ -35,6 +35,8 @@ drop table if exists public.consulting_advisors;
 drop table if exists public.consulting_settings;
 drop table if exists public.job_runs;
 
+-- Ajoutée par 20261125000100_consulting_reminder_lead (dépend du type consulting_mode).
+drop function if exists public.consulting_reminder_lead(public.consulting_mode);
 drop function if exists public.consulting_is_advisor(uuid);
 drop function if exists public.consulting_is_staff(uuid);
 drop function if exists public.consulting_can_manage(uuid, uuid);

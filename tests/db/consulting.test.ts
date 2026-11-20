@@ -388,26 +388,49 @@ describe('CSC Consulting', () => {
 
   // ---------------------------------------------------------------------------
   describe('Rappels', () => {
-    it('la veille et 1 h avant, jamais deux fois', async () => {
+    it('la veille, puis 15 min avant (visio, appel) ou 1 h avant (présentiel), jamais deux fois', async () => {
+      // Un client par rendez-vous : un même client ne peut pas avoir deux rendez-vous qui se chevauchent.
       const client = await createUser(db);
       const tomorrow = await rawBooking(client, 20 * 60 + 2000);
-      const inHalfHour = await rawBooking(client, 30 + 3000);
-      // Rendez-vous décalés dans le futur lointain pour ne pas gêner : on ramène chacun à son horaire de test.
-      await q(`update public.consulting_bookings set starts_at = now() + interval '20 hours' where id = $1`, [tomorrow]);
-      await q(`update public.consulting_bookings set starts_at = now() + interval '30 minutes' where id = $1`, [inHalfHour]);
+      const videoSoon = await rawBooking(await createUser(db), 3000, { mode: 'video' });
+      const phoneSoon = await rawBooking(await createUser(db), 4000, { mode: 'phone' });
+      const videoLater = await rawBooking(await createUser(db), 5000, { mode: 'video' });
+      const inPersonSoon = await rawBooking(await createUser(db), 6000, { mode: 'in_person' });
+      const inPersonLater = await rawBooking(await createUser(db), 7000, { mode: 'in_person' });
+      // Rendez-vous créés loin dans le futur (pas de chevauchement) : on ramène chacun à son horaire de test.
+      const at = (id: string, minutes: number) =>
+        q(`update public.consulting_bookings set starts_at = now() + make_interval(mins => $2) where id = $1`, [id, minutes]);
+      await at(tomorrow, 20 * 60);
+      await at(videoSoon, 15);
+      await at(phoneSoon, 18);
+      await at(videoLater, 30); // trop tôt pour le rappel « 15 min »
+      await at(inPersonSoon, 60);
+      await at(inPersonLater, 90); // trop tôt pour le rappel « 1 h »
+      const ids = [tomorrow, videoSoon, phoneSoon, videoLater, inPersonSoon, inPersonLater];
 
       const claimed = await asService(() => q<{ booking_id: string; kind: string }>('select booking_id, kind from public.consulting_claim_reminders(500)'));
-      const mine = claimed.filter((r) => r.booking_id === tomorrow || r.booking_id === inHalfHour);
+      const mine = claimed.filter((r) => ids.includes(r.booking_id));
       expect(mine).toEqual(
         expect.arrayContaining([
           { booking_id: tomorrow, kind: 'day_before' },
-          { booking_id: inHalfHour, kind: 'hour_before' },
+          { booking_id: videoSoon, kind: 'soon' },
+          { booking_id: phoneSoon, kind: 'soon' },
+          { booking_id: inPersonSoon, kind: 'soon' },
         ]),
       );
-      expect(mine).toHaveLength(2);
+      expect(mine).toHaveLength(4);
       const again = await asService(() => q<{ booking_id: string }>('select booking_id from public.consulting_claim_reminders(500)'));
-      expect(again.filter((r) => r.booking_id === tomorrow || r.booking_id === inHalfHour)).toHaveLength(0);
+      expect(again.filter((r) => ids.includes(r.booking_id))).toHaveLength(0);
       expect(await errorOf(as(db, client, () => q('select * from public.consulting_claim_reminders(10)')))).not.toBeNull();
+    });
+
+    it('rendez-vous déjà rappelé « 1 h avant » par l’ancienne règle : pas de second rappel', async () => {
+      const client = await createUser(db);
+      const id = await rawBooking(client, 8000, { mode: 'video' });
+      await q(`update public.consulting_bookings set starts_at = now() + interval '10 minutes' where id = $1`, [id]);
+      await q(`insert into public.consulting_reminders (booking_id, kind) values ($1, 'hour_before')`, [id]);
+      const claimed = await asService(() => q<{ booking_id: string }>('select booking_id from public.consulting_claim_reminders(500)'));
+      expect(claimed.map((r) => r.booking_id)).not.toContain(id);
     });
 
     it('pas de rappel « veille » pour un rendez-vous confirmé moins de 23 h avant', async () => {
