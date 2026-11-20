@@ -14,6 +14,7 @@ import { SelectField, SubmitButton, TextField } from '@/components/forms/fields'
 import { formatDate } from '@/lib/format';
 import { isPast, type Advisor, type AvailabilityRule } from '@/lib/consulting/types';
 import type { Locale } from '@/lib/types';
+import { parseTstzRange } from '@/lib/consulting/range';
 import { addAdvisor, addAvailability, addUnavailability, removeAvailability, removeUnavailability, setAdvisorStatus } from '../actions';
 
 export const metadata: Metadata = { title: 'Disponibilités — CSC Consulting' };
@@ -26,11 +27,6 @@ interface UnavailabilityRow {
   reason: string;
 }
 
-/** « ["2027-01-10 08:00:00+00","2027-01-12 18:00:00+00") » → bornes ISO. */
-function parseRange(range: string): [string, string] {
-  const [a, b] = range.replace(/^[[(]|[\])]$/g, '').split(',').map((s) => s.trim().replace(/"/g, ''));
-  return [new Date(a.replace(' ', 'T')).toISOString(), new Date(b.replace(' ', 'T')).toISOString()];
-}
 
 /** Conseillers, créneaux habituels (heure du Cameroun) et indisponibilités. */
 export default async function AvailabilityPage() {
@@ -45,7 +41,11 @@ export default async function AvailabilityPage() {
   const advisors = (advisorsData ?? []) as Advisor[];
   const rules = (rulesData ?? []) as AvailabilityRule[];
   const unavailabilities = ((unavData ?? []) as UnavailabilityRow[])
-    .map((u) => ({ ...u, range: parseRange(u.period) }))
+    .flatMap((u) => {
+      // Plage illisible : ignorée plutôt que de faire planter la page.
+      const range = parseTstzRange(u.period);
+      return range ? [{ ...u, range }] : [];
+    })
     .filter((u) => !isPast(u.range[1]));
   const active = advisors.filter((a) => a.active);
   const advisorOptions = active.map((a) => ({ value: a.user_id, label: a.display_name }));
