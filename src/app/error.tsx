@@ -4,7 +4,9 @@ import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { Logo } from '@/components/logo';
+import { TextLink } from '@/components/ui/links';
 import { ErrorIllustration } from '@/components/error-illustration';
 
 /** Page d'erreur : illustration, message simple, bouton « Réessayer ». Aucun détail technique affiché. */
@@ -15,6 +17,9 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
       component="main"
       sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', px: 4, py: 8, bgcolor: 'background.default' }}
     >
+      <Box sx={{ mb: 6 }}>
+        <Logo size={56} />
+      </Box>
       <ErrorIllustration />
       <Typography variant="h4" component="h1" sx={{ mt: 6, mb: 2, fontWeight: 700 }}>
         {t('errorTitle')}
@@ -38,6 +43,10 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
       >
         {t('retry')}
       </Button>
+      <TextLink href="/" sx={{ mt: 5, display: 'inline-flex', alignItems: 'center', gap: 1, fontWeight: 600, minHeight: 44 }}>
+        <ArrowLeft aria-hidden size={16} />
+        {t('backHome')}
+      </TextLink>
     </Box>
   );
 }

@@ -26,7 +26,7 @@ export function CourseForm({ action, course }: { action: ServerAction; course?: 
     course ? course[`${field}_${src}`] || course[`${field}_${src === 'fr' ? 'en' : 'fr'}`] : '';
 
   return (
-    <form action={formAction} noValidate>
+    <form onSubmit={formAction} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         {course && <input type="hidden" name="id" value={course.id} />}

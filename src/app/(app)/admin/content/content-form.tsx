@@ -30,7 +30,7 @@ export function ContentForm({
   const body = src === 'fr' ? bodyFr || bodyEn : bodyEn || bodyFr;
 
   return (
-    <form action={action} noValidate>
+    <form onSubmit={action} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         <input type="hidden" name="key" value={contentKey} />

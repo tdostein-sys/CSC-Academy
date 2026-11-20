@@ -27,7 +27,7 @@ export function SessionForm({ action, courseId, session }: { action: ServerActio
   const frozen = Boolean(session?.frozen_at);
 
   return (
-    <form action={formAction} noValidate>
+    <form onSubmit={formAction} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         {session && <input type="hidden" name="id" value={session.id} />}

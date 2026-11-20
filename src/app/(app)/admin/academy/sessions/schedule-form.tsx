@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -8,7 +8,8 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { Plus, Trash2 } from 'lucide-react';
 import { FormMessage, SubmitButton, TextField } from '@/components/forms/fields';
-import { initialFormState, type FormState } from '@/lib/forms';
+import { useFormSubmit } from '@/components/forms/use-validated-action';
+import type { FormState } from '@/lib/forms';
 import { formatXAF } from '@/lib/format';
 import { parseAmount } from '@/lib/numbers';
 import { MAX_INSTALLMENTS } from '@/lib/validation/academy';
@@ -30,7 +31,7 @@ export function ScheduleForm({ action, sessionId, installments }: { action: Serv
   const t = useTranslations('adminAcademy.session');
   const ta = useTranslations('academy');
   const locale = useLocale() === 'en' ? 'en' : 'fr';
-  const [state, formAction, pending] = useActionState(action, initialFormState);
+  const { state, submit, pending } = useFormSubmit(action);
   const [rows, setRows] = useState<Row[]>(() =>
     installments.length
       ? installments.map((i) => ({ key: i.rank, amount: String(i.amount), due: i.due_on }))
@@ -40,7 +41,7 @@ export function ScheduleForm({ action, sessionId, installments }: { action: Serv
   const update = (key: number, patch: Partial<Row>) => setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...patch } : r)));
 
   return (
-    <form action={formAction}>
+    <form onSubmit={submit} noValidate>
       <input type="hidden" name="id" value={sessionId} />
       <Box sx={{ display: 'grid', gap: 3 }}>
         {rows.map((r, i) => (

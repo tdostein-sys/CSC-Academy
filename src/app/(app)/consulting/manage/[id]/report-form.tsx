@@ -1,11 +1,10 @@
 'use client';
 
-import { useActionState } from 'react';
 import { useTranslations } from 'next-intl';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import { FormMessage, SubmitButton, TextAreaField, TextField } from '@/components/forms/fields';
-import { initialFormState } from '@/lib/forms';
+import { useFormSubmit } from '@/components/forms/use-validated-action';
 import { saveReport } from '../actions';
 
 export interface ReportDraft {
@@ -20,10 +19,10 @@ export interface ReportDraft {
 export function ReportForm({ bookingId, draft }: { bookingId: string; draft: ReportDraft }) {
   const t = useTranslations('consulting.report');
   const tc = useTranslations('common');
-  const [state, action, pending] = useActionState(saveReport, initialFormState);
+  const { state, submit, pending } = useFormSubmit(saveReport);
   const e = state.fieldErrors ?? {};
   return (
-    <form action={action} noValidate>
+    <form onSubmit={submit} noValidate>
       <Stack spacing={4}>
         <FormMessage state={state} />
         <input type="hidden" name="booking_id" value={bookingId} />

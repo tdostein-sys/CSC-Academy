@@ -9,17 +9,23 @@ import { requireUser } from '@/lib/auth';
 import { PageHeader } from '@/components/page-header';
 import { ProfileForm } from './profile-form';
 import { LinkButton } from '@/components/ui/links';
+import { Notice } from '@/components/ui/notice';
 
 export const metadata: Metadata = { title: 'Mon profil' };
 
-/** Profil : mise en page « Paramètres du compte » de Sneat. */
-export default async function ProfilePage() {
+/** Profil : mise en page Â« ParamÃ¨tres du compte Â» de Sneat. */
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ password?: string }> }) {
   const user = await requireUser('/profile');
-  const t = await getTranslations('profile');
+  const [t, sp] = await Promise.all([getTranslations('profile'), searchParams]);
 
   return (
     <Box sx={{ maxWidth: 760 }}>
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
+      {sp.password === 'changed' && (
+        <Box sx={{ mb: 6 }}>
+          <Notice tone="success">{t('passwordChangedOthers')}</Notice>
+        </Box>
+      )}
       <Card>
         <CardContent sx={{ pt: 6 }}>
           <ProfileForm profile={user.profile} />

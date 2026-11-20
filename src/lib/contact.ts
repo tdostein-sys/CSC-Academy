@@ -9,6 +9,7 @@ export const CONTACT_STATUSES = ['new', 'in_progress', 'done'] as const;
 export type ContactStatus = (typeof CONTACT_STATUSES)[number];
 
 export const CONTACT_MESSAGE_MAX = 2000;
+export const CONTACT_MESSAGE_MIN = 10;
 
 export function isContactSubject(v: unknown): v is ContactSubject {
   return typeof v === 'string' && (CONTACT_SUBJECTS as readonly string[]).includes(v);
@@ -41,7 +42,7 @@ export const contactSchema = z.object({
   email: z.string().trim().toLowerCase().max(254, 'validation.tooLong').pipe(z.email('validation.emailInvalid')),
   phone: optionalPhone.default(''),
   subject: z.enum(CONTACT_SUBJECTS, 'validation.required'),
-  message: z.string().trim().min(10, 'contact.validation.messageTooShort').max(CONTACT_MESSAGE_MAX, 'validation.tooLong'),
+  message: z.string().trim().min(CONTACT_MESSAGE_MIN, 'contact.validation.messageTooShort').max(CONTACT_MESSAGE_MAX, 'validation.tooLong'),
   enrollment_id: z
     .string()
     .trim()

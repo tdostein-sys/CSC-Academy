@@ -63,6 +63,22 @@ export const newPasswordSchema = z
     path: ['password_confirm'],
   });
 
+/** Changement de mot de passe depuis le compte : l'actuel est exigé. */
+export const changePasswordSchema = z
+  .object({
+    current_password: z.string().min(1, 'validation.currentPasswordRequired').max(72, 'validation.tooLong'),
+    password: passwordSchema,
+    password_confirm: z.string(),
+  })
+  .refine((d) => d.password === d.password_confirm, {
+    message: 'validation.passwordMismatch',
+    path: ['password_confirm'],
+  })
+  .refine((d) => d.password !== d.current_password, {
+    message: 'validation.passwordSameAsOld',
+    path: ['password'],
+  });
+
 export const profileSchema = z.object({
   first_name: name,
   last_name: name,

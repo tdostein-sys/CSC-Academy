@@ -24,7 +24,7 @@ export function SettingsForm({ action, settings }: { action: ServerAction; setti
   const instructions = settings[`payment_instructions_${src}`] || settings[`payment_instructions_${src === 'fr' ? 'en' : 'fr'}`];
 
   return (
-    <form action={formAction} noValidate>
+    <form onSubmit={formAction} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         <Box sx={{ display: 'grid', gap: 4, gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' } }}>

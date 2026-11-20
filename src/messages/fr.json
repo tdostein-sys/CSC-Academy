@@ -28,7 +28,10 @@
     "previous": "Précédent",
     "next": "Suivant",
     "search": "Rechercher",
-    "noResults": "Aucun résultat."
+    "noResults": "Aucun résultat.",
+    "charCount": "{count} caractÃ¨res",
+    "charCountMin": "{count} / {min} caractÃ¨res minimum",
+    "charCountMax": "{count} / {max} caractÃ¨res"
   },
   "nav": {
     "home": "Accueil",
@@ -303,7 +306,33 @@
     "changeSubmit": "Changer mon mot de passe",
     "backToLogin": "Retour à la connexion",
     "linkInvalid": "Ce lien est invalide ou a expiré. Faites une nouvelle demande.",
-    "emailConfirmed": "Votre adresse e-mail est confirmée. Vous pouvez vous connecter."
+    "emailConfirmed": "Votre adresse e-mail est confirmée. Vous pouvez vous connecter.",
+    "hidePassword": "Masquer le mot de passe",
+    "remember": "Rester connectÃ© sur cet appareil",
+    "backToHome": "Retour Ã  lâ€™accueil",
+    "backToProfile": "Retour Ã  mon profil",
+    "currentPassword": "Mot de passe actuel",
+    "currentPasswordForcedHint": "Le mot de passe provisoire qui vous a Ã©tÃ© communiquÃ©.",
+    "currentPasswordWrong": "Mot de passe actuel incorrect. VÃ©rifiez la saisie (majuscules, clavier) ou utilisez Â« Mot de passe oubliÃ© Â».",
+    "changeOwnTitle": "Changer mon mot de passe",
+    "changeOwnSubtitle": "Saisissez votre mot de passe actuel, puis le nouveau. Vos autres appareils seront dÃ©connectÃ©s.",
+    "loggedOutIdle": "Vous avez Ã©tÃ© dÃ©connectÃ© aprÃ¨s {minutes} minutes dâ€™inactivitÃ©, pour protÃ©ger votre compte. Reconnectez-vous pour continuer.",
+    "loggedOutExpired": "Par sÃ©curitÃ©, une session dure au plus {days} jours. Reconnectez-vous pour continuer.",
+    "passwordRules": {
+      "title": "RÃ¨gles du mot de passe",
+      "length": "8 caractÃ¨res minimum",
+      "letter": "Au moins une lettre",
+      "digit": "Au moins un chiffre",
+      "met": "rÃ¨gle respectÃ©e",
+      "unmet": "rÃ¨gle non respectÃ©e",
+      "match": "Les deux mots de passe correspondent",
+      "noMatch": "Les deux mots de passe ne correspondent pas",
+      "strength0": "Robustesse",
+      "strength1": "Trop faible",
+      "strength2": "Correct",
+      "strength3": "Bon",
+      "strength4": "Excellent"
+    }
   },
   "validation": {
     "required": "Ce champ est obligatoire.",
@@ -350,7 +379,8 @@
     "cancelLimitInvalid": "Entre 0 et 168 heures.",
     "timeInvalid": "Heure invalide (HH:MM).",
     "pdfOrImageOnly": "Formats acceptés : PDF, PNG, JPEG ou WebP.",
-    "consultingFileTooLarge": "Fichier trop volumineux (4 Mo maximum)."
+    "consultingFileTooLarge": "Fichier trop volumineux (4 Mo maximum).",
+    "currentPasswordRequired": "Saisissez votre mot de passe actuel."
   },
   "errors": {
     "checkForm": "Veuillez corriger les champs signalés.",
@@ -364,7 +394,8 @@
     "notFoundTitle": "Page introuvable",
     "notFoundBody": "La page demandée n'existe pas ou a été déplacée.",
     "errorTitle": "Oups, un problème est survenu",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "backHome": "Retour Ã  lâ€™accueil"
   },
   "dashboard": {
     "title": "Mon espace",
@@ -420,7 +451,8 @@
     "emailReadonly": "L'adresse e-mail sert d'identifiant et ne peut pas être modifiée ici.",
     "securityTitle": "Sécurité",
     "changePassword": "Changer mon mot de passe",
-    "passwordChanged": "Mot de passe modifié."
+    "passwordChanged": "Mot de passe modifié.",
+    "passwordChangedOthers": "Votre mot de passe a Ã©tÃ© modifiÃ©. Vos autres appareils ont Ã©tÃ© dÃ©connectÃ©s."
   },
   "notifications": {
     "title": "Notifications",
@@ -2241,5 +2273,11 @@
         "subject_other": "Sujet : autre"
       }
     }
+  },
+  "session": {
+    "warningTitle": "Toujours lÃ  ?",
+    "warningBody": "Sans activitÃ© de votre part, vous allez Ãªtre dÃ©connectÃ© dans {countdown}, pour protÃ©ger votre compte.",
+    "stay": "Rester connectÃ©",
+    "logoutNow": "Me dÃ©connecter"
   }
 }

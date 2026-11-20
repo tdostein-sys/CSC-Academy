@@ -1,9 +1,10 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { initialFormState, type FormState } from '@/lib/forms';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import type { FormState } from '@/lib/forms';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { FormMessage } from './fields';
+import { formDataWithSubmitter, useFormSubmit } from './use-validated-action';
 
 type ServerAction = (prev: FormState, fd: FormData) => Promise<FormState>;
 
@@ -11,6 +12,8 @@ type ServerAction = (prev: FormState, fd: FormData) => Promise<FormState>;
  * Petit formulaire d'action (bouton « Valider », « Payer », « Suspendre »…)
  * utilisable directement depuis une page serveur. Les identifiants passent en
  * champs cachés ; l'action serveur revérifie tout (rôle, état, montants).
+ * La saisie n'est jamais effacée en cas d'erreur (voir useFormSubmit) ; elle
+ * n'est vidée après un succès que si `resetOnSuccess` est demandé.
  */
 export function ActionForm({
   action,
@@ -34,10 +37,9 @@ export function ActionForm({
   style?: CSSProperties;
   resetOnSuccess?: boolean;
 }) {
-  const [state, formAction, pending] = useActionState(action, initialFormState);
+  const { state, submit, send, pending } = useFormSubmit(action);
   const ref = useRef<HTMLFormElement>(null);
-  const confirmed = useRef(false);
-  const submitter = useRef<HTMLElement | null>(null);
+  const waiting = useRef<FormData | null>(null);
   const [asking, setAsking] = useState(false);
 
   useEffect(() => {
@@ -52,15 +54,13 @@ export function ActionForm({
     <>
       <form
         ref={ref}
-        action={formAction}
+        noValidate
         onSubmit={(e) => {
-          if (!confirm || confirmed.current) {
-            confirmed.current = false;
-            return;
-          }
+          if (!confirm) return submit(e);
           // On suspend l'envoi et on demande confirmation dans l'application.
           e.preventDefault();
-          submitter.current = (e.nativeEvent as SubmitEvent).submitter;
+          if (pending) return;
+          waiting.current = formDataWithSubmitter(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter);
           setAsking(true);
         }}
         style={style}
@@ -85,9 +85,8 @@ export function ActionForm({
           onCancel={() => setAsking(false)}
           onConfirm={() => {
             setAsking(false);
-            confirmed.current = true;
-            // Renvoie le formulaire avec le même bouton (conserve name/value).
-            ref.current?.requestSubmit(submitter.current instanceof HTMLButtonElement ? submitter.current : undefined);
+            if (waiting.current) send(waiting.current, ref.current);
+            waiting.current = null;
           }}
         />
       )}

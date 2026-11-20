@@ -48,6 +48,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { logout } from '@/app/auth/actions';
+import { IdleTimeout, broadcastLogout } from '@/components/session/idle-timeout';
 import { Logo } from '@/components/logo';
 import { tok } from '@/@core/theme/tokens';
 import { LanguageMenu, ThemeMenu } from './preferences';
@@ -221,7 +222,7 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
               {user.isAdmin ? t('admin') : (user.ambassadorCode ?? user.email)}
             </Typography>
           </Box>
-          <Box component="form" action={logout}>
+          <Box component="form" action={logout} onSubmit={broadcastLogout}>
             <Tooltip title={t('logout')}>
               <IconButton type="submit" aria-label={t('logout')} sx={{ color: 'inherit' }}>
                 <LogOut aria-hidden size={18} />
@@ -238,6 +239,7 @@ export function AppShell({ user, children }: { user: ShellUser | null; children:
     // changement de thème sans rechargement, le style global du rendu serveur
     // restait prioritaire (page blanche en mode sombre, titres illisibles).
     <Box sx={{ display: 'flex', minHeight: '100dvh', bgcolor: 'background.default', color: 'text.primary' }}>
+      {user && <IdleTimeout />}
       <a href="#contenu" className="sr-only">
         {ts('skipToContent')}
       </a>
@@ -409,7 +411,7 @@ function UserMenu({ user }: { user: ShellUser }) {
           </MenuItem>
         )}
         <Divider sx={{ my: 1 }} />
-        <Box component="form" action={logout}>
+        <Box component="form" action={logout} onSubmit={broadcastLogout}>
           <MenuItem component="button" type="submit" sx={{ width: '100%', color: 'error.main' }}>
             <ListItemIcon sx={{ color: 'inherit' }}>
               <LogOut aria-hidden size={18} />

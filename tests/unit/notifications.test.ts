@@ -40,6 +40,7 @@ const samples: { [K in NotificationType]: TemplateParams[K] } = {
   'consulting.reminder_staff': { clientName: 'Awa Ndiaye', offerTitle: 'Bilan', date: '24 nov. 2026 10:00', mode: 'phone', phone: '+237690000000' },
   'consulting.report_published': { offerTitle: 'Bilan', date: '24 nov. 2026 10:00' },
   'consulting.refunded': { offerTitle: 'Bilan', amount: '25 000 FCFA', reference: 'RB-1' },
+  'account.password_changed': { date: '20 novembre 2026 à 15:00' },
 };
 
 describe('modèles de notifications', () => {

@@ -28,7 +28,10 @@
     "previous": "Previous",
     "next": "Next",
     "search": "Search",
-    "noResults": "No results."
+    "noResults": "No results.",
+    "charCount": "{count} characters",
+    "charCountMin": "{count} / {min} characters minimum",
+    "charCountMax": "{count} / {max} characters"
   },
   "nav": {
     "home": "Home",
@@ -303,7 +306,33 @@
     "changeSubmit": "Change my password",
     "backToLogin": "Back to login",
     "linkInvalid": "This link is invalid or has expired. Please request a new one.",
-    "emailConfirmed": "Your e-mail address is confirmed. You can now log in."
+    "emailConfirmed": "Your e-mail address is confirmed. You can now log in.",
+    "hidePassword": "Hide password",
+    "remember": "Stay signed in on this device",
+    "backToHome": "Back to home",
+    "backToProfile": "Back to my profile",
+    "currentPassword": "Current password",
+    "currentPasswordForcedHint": "The temporary password you were given.",
+    "currentPasswordWrong": "Current password is incorrect. Check your typing (caps lock, keyboard) or use \"Forgot password\".",
+    "changeOwnTitle": "Change my password",
+    "changeOwnSubtitle": "Enter your current password, then the new one. Your other devices will be signed out.",
+    "loggedOutIdle": "You were signed out after {minutes} minutes of inactivity, to protect your account. Sign in again to continue.",
+    "loggedOutExpired": "For security, a session lasts at most {days} days. Sign in again to continue.",
+    "passwordRules": {
+      "title": "Password rules",
+      "length": "At least 8 characters",
+      "letter": "At least one letter",
+      "digit": "At least one digit",
+      "met": "rule met",
+      "unmet": "rule not met",
+      "match": "Both passwords match",
+      "noMatch": "The passwords do not match",
+      "strength0": "Strength",
+      "strength1": "Too weak",
+      "strength2": "Fair",
+      "strength3": "Good",
+      "strength4": "Excellent"
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -350,7 +379,8 @@
     "cancelLimitInvalid": "Between 0 and 168 hours.",
     "timeInvalid": "Invalid time (HH:MM).",
     "pdfOrImageOnly": "Accepted formats: PDF, PNG, JPEG or WebP.",
-    "consultingFileTooLarge": "File too large (4 MB maximum)."
+    "consultingFileTooLarge": "File too large (4 MB maximum).",
+    "currentPasswordRequired": "Enter your current password."
   },
   "errors": {
     "checkForm": "Please fix the highlighted fields.",
@@ -364,7 +394,8 @@
     "notFoundTitle": "Page not found",
     "notFoundBody": "The requested page does not exist or has been moved.",
     "errorTitle": "Oops, something went wrong",
-    "retry": "Try again"
+    "retry": "Try again",
+    "backHome": "Back to home"
   },
   "dashboard": {
     "title": "My space",
@@ -420,7 +451,8 @@
     "emailReadonly": "Your e-mail address is your login and cannot be changed here.",
     "securityTitle": "Security",
     "changePassword": "Change my password",
-    "passwordChanged": "Password changed."
+    "passwordChanged": "Password changed.",
+    "passwordChangedOthers": "Your password was changed. Your other devices have been signed out."
   },
   "notifications": {
     "title": "Notifications",
@@ -2241,5 +2273,11 @@
         "subject_other": "Sujet : autre"
       }
     }
+  },
+  "session": {
+    "warningTitle": "Still there?",
+    "warningBody": "Without any activity, you will be signed out in {countdown}, to protect your account.",
+    "stay": "Stay signed in",
+    "logoutNow": "Sign me out"
   }
 }

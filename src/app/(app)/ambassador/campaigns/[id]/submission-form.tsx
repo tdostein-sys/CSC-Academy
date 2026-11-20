@@ -21,7 +21,7 @@ export function SubmissionForm({ campaignId, minVolumeLabel }: { campaignId: str
   }, [state]);
 
   return (
-    <form ref={formRef} action={action} noValidate>
+    <form ref={formRef} onSubmit={action} noValidate>
       <Stack spacing={4}>
         <FormMessage state={state} />
         <input type="hidden" name="campaign_id" value={campaignId} />

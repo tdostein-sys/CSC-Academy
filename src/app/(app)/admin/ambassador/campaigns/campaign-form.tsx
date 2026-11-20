@@ -40,7 +40,7 @@ export function CampaignForm({
   const text = (field: 'title' | 'summary' | 'modop') => (campaign ? campaign[`${field}_${src}`] || campaign[`${field}_${src === 'fr' ? 'en' : 'fr'}`] : '');
 
   return (
-    <form action={formAction} noValidate>
+    <form onSubmit={formAction} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         {campaign && <input type="hidden" name="id" value={campaign.id} />}

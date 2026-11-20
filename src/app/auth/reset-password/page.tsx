@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import { getSessionUser } from '@/lib/auth';
 import { AuthHeading } from '@/components/auth-heading';
 import { Notice } from '@/components/ui/notice';
-import { NewPasswordForm } from '../forms';
+import { ResetPasswordForm } from '../forms';
 import { LinkButton } from '@/components/ui/links';
 
 export const metadata: Metadata = { title: 'Nouveau mot de passe' };
@@ -27,7 +27,7 @@ export default async function ResetPasswordPage() {
   return (
     <>
       <AuthHeading title={t('resetTitle')} subtitle={t('resetSubtitle')} />
-      <NewPasswordForm mode="reset" />
+      <ResetPasswordForm />
     </>
   );
 }

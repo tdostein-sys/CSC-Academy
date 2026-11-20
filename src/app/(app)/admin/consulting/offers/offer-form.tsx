@@ -27,7 +27,7 @@ export function OfferForm({ action, offer }: { action: ServerAction; offer?: Off
     offer ? offer[`${field}_${src}`] || offer[`${field}_${src === 'fr' ? 'en' : 'fr'}`] : '';
 
   return (
-    <form action={formAction} noValidate>
+    <form onSubmit={formAction} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         {offer && <input type="hidden" name="id" value={offer.id} />}

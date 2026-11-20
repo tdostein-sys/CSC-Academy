@@ -18,7 +18,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   const e = state.fieldErrors ?? {};
 
   return (
-    <form action={action} noValidate>
+    <form onSubmit={action} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         <Grid container spacing={5}>

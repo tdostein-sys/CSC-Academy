@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import { Send } from 'lucide-react';
 import { FormMessage, SelectField, SubmitButton, TextAreaField, TextField } from '@/components/forms/fields';
 import { useValidatedAction } from '@/components/forms/use-validated-action';
-import { CONTACT_MESSAGE_MAX, CONTACT_SUBJECTS, contactSchema, type ContactSubject } from '@/lib/contact';
+import { CONTACT_MESSAGE_MAX, CONTACT_MESSAGE_MIN, CONTACT_SUBJECTS, contactSchema, type ContactSubject } from '@/lib/contact';
 import { submitContact } from './actions';
 
 export interface ContactFormDefaults {
@@ -31,11 +31,14 @@ export function ContactForm({ defaults, enrollments }: { defaults: ContactFormDe
   useEffect(() => {
     if (state.status !== 'success') return;
     const msg = form.current?.elements.namedItem('message');
-    if (msg instanceof HTMLTextAreaElement) msg.value = '';
+    if (!(msg instanceof HTMLTextAreaElement)) return;
+    // Setter natif + événement « input » : le compteur de caractères suit.
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set?.call(msg, '');
+    msg.dispatchEvent(new Event('input', { bubbles: true }));
   }, [state]);
 
   return (
-    <form ref={form} action={action} noValidate>
+    <form ref={form} onSubmit={action} noValidate>
       <Stack spacing={4}>
         <FormMessage state={state} />
         <Grid container spacing={4}>
@@ -70,7 +73,7 @@ export function ContactForm({ defaults, enrollments }: { defaults: ContactFormDe
             </Grid>
           )}
           <Grid item xs={12}>
-            <TextAreaField name="message" label={t('message')} hint={t('messageHint', { max: CONTACT_MESSAGE_MAX })} required maxLength={CONTACT_MESSAGE_MAX} minRows={6} monospace={false} error={e.message} />
+            <TextAreaField name="message" label={t('message')} hint={t('messageHint', { max: CONTACT_MESSAGE_MAX })} required maxLength={CONTACT_MESSAGE_MAX} minLength={CONTACT_MESSAGE_MIN} showCounter minRows={6} monospace={false} error={e.message} />
           </Grid>
         </Grid>
         {/* Champ piège pour les robots : invisible et ignoré par les lecteurs d'écran. */}

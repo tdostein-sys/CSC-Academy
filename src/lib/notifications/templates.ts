@@ -7,6 +7,7 @@ import type { Locale } from '@/lib/types';
 export interface TemplateParams {
   'system.welcome': { firstName: string };
   'system.test': { message: string };
+  'account.password_changed': { date: string };
   'ambassador.joined': { code: string };
   'ambassador.suspended': { reason: string };
   'ambassador.reactivated': Record<string, never>;
@@ -93,6 +94,16 @@ const templates: Templates = {
   'system.test': {
     fr: (p) => ({ title: 'Notification de test', body: p.message }),
     en: (p) => ({ title: 'Test notification', body: p.message }),
+  },
+  'account.password_changed': {
+    fr: (p) => ({
+      title: 'Votre mot de passe a été modifié',
+      body: `Le mot de passe de votre compte CSC a été modifié le ${p.date} (heure du Cameroun). Les autres appareils ont été déconnectés. Si vous n'êtes pas à l'origine de ce changement, utilisez « Mot de passe oublié » puis contactez CSC sans attendre.`,
+    }),
+    en: (p) => ({
+      title: 'Your password was changed',
+      body: `Your CSC account password was changed on ${p.date} (Cameroon time). Other devices have been signed out. If you did not make this change, use "Forgot password" and contact CSC right away.`,
+    }),
   },
   'ambassador.joined': {
     fr: (p) => ({

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -8,7 +8,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { CalendarCheck } from 'lucide-react';
 import { FormMessage, SubmitButton, TextAreaField } from '@/components/forms/fields';
-import { initialFormState, type FormState } from '@/lib/forms';
+import { useFormSubmit } from '@/components/forms/use-validated-action';
+import type { FormState } from '@/lib/forms';
 
 type ServerAction = (prev: FormState, fd: FormData) => Promise<FormState>;
 
@@ -39,7 +40,7 @@ export function SlotPicker({
   timezoneNote: string;
 }) {
   const t = useTranslations('consulting.picker');
-  const [state, formAction, pending] = useActionState(action, initialFormState);
+  const { state, submit, pending } = useFormSubmit(action);
   const [dayIndex, setDayIndex] = useState(0);
   const [chosen, setChosen] = useState<string | null>(null);
   const day = days[dayIndex];
@@ -49,7 +50,7 @@ export function SlotPicker({
   }
 
   return (
-    <form action={formAction} noValidate>
+    <form onSubmit={submit} noValidate>
       <Stack spacing={5}>
         <FormMessage state={state} />
         {Object.entries(hidden).map(([k, v]) => (
