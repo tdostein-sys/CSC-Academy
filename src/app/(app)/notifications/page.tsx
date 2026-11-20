@@ -52,7 +52,7 @@ export default async function NotificationsPage() {
       ) : (
         <Stack component="ul" spacing={3} sx={{ listStyle: 'none', p: 0, m: 0 }}>
           {items.map((n) => (
-            <Card component="li" key={n.id} sx={n.read_at ? undefined : { borderLeft: '4px solid #f5c211' }}>
+            <Card component="li" key={n.id} sx={n.read_at ? undefined : { borderLeft: 3, borderLeftColor: 'primary.main' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 3 }}>
                   <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600 }}>

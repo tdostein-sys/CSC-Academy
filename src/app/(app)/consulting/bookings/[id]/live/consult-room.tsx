@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { LiveKitRoom, RoomAudioRenderer, StartAudio, VideoTrack, isTrackReference, useChat, useConnectionState, useLocalParticipant, useRoomContext, useTracks } from '@livekit/components-react';
 import { ConnectionState, MediaDeviceFailure, Track } from 'livekit-client';
 import Box from '@mui/material/Box';
+import { tok } from '@/@core/theme/tokens';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
@@ -145,9 +146,9 @@ function Stage({ bookingId, isHost, endLabel, deviceNotice }: { bookingId: strin
         )}
 
         {screen && (
-          <Box sx={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', bgcolor: '#111418', borderRadius: 1, overflow: 'hidden' }}>
+          <Box sx={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', bgcolor: (t) => tok(t).media, borderRadius: 1, overflow: 'hidden' }}>
             <VideoTrack trackRef={screen} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            <Typography variant="caption" sx={{ position: 'absolute', left: 8, bottom: 8, px: 2, py: 0.5, borderRadius: 1, bgcolor: 'rgba(0,0,0,0.65)', color: '#fff' }}>
+            <Typography variant="caption" sx={{ position: 'absolute', left: 8, bottom: 8, px: 2, py: 0.5, borderRadius: 1, bgcolor: (t) => tok(t)['media-label'], color: (t) => tok(t)['on-media'] }}>
               {screen.participant.name} · {t('screen')}
             </Typography>
           </Box>
@@ -155,13 +156,13 @@ function Stage({ bookingId, isHost, endLabel, deviceNotice }: { bookingId: strin
 
         <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', sm: screen ? 'repeat(2, minmax(0, 220px))' : 'repeat(2, minmax(0, 1fr))' } }}>
           {cameras.map((ref) => (
-            <Box key={ref.participant.identity} sx={{ position: 'relative', aspectRatio: '4 / 3', bgcolor: '#111418', borderRadius: 1, overflow: 'hidden', display: 'grid', placeItems: 'center' }}>
+            <Box key={ref.participant.identity} sx={{ position: 'relative', aspectRatio: '4 / 3', bgcolor: (t) => tok(t).media, borderRadius: 1, overflow: 'hidden', display: 'grid', placeItems: 'center' }}>
               {isTrackReference(ref) && !ref.publication.isMuted ? (
                 <VideoTrack trackRef={ref} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: ref.participant.isLocal ? 'scaleX(-1)' : undefined }} />
               ) : (
-                <Typography sx={{ color: '#E8EAED' }}>{t('cameraOffFor', { name: ref.participant.name ?? '' })}</Typography>
+                <Typography sx={{ color: (t) => tok(t)['on-media'] }}>{t('cameraOffFor', { name: ref.participant.name ?? '' })}</Typography>
               )}
-              <Typography variant="caption" sx={{ position: 'absolute', left: 8, bottom: 8, px: 2, py: 0.5, borderRadius: 1, bgcolor: 'rgba(0,0,0,0.65)', color: '#fff' }}>
+              <Typography variant="caption" sx={{ position: 'absolute', left: 8, bottom: 8, px: 2, py: 0.5, borderRadius: 1, bgcolor: (t) => tok(t)['media-label'], color: (t) => tok(t)['on-media'] }}>
                 {ref.participant.name}
                 {ref.participant.isLocal ? ` (${t('you')})` : ''}
               </Typography>

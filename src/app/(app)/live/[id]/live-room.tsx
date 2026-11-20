@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { LiveKitRoom, RoomAudioRenderer, StartAudio, VideoTrack, useChat, useConnectionState, useDataChannel, useRoomContext, useTracks } from '@livekit/components-react';
 import { ConnectionState, MediaDeviceFailure, RoomEvent, Track, type Participant } from 'livekit-client';
 import Box from '@mui/material/Box';
+import { tok } from '@/@core/theme/tokens';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
@@ -293,7 +294,7 @@ function Stage({ meetingId, isHost, endLabel, deviceNotice }: { meetingId: strin
             position: 'relative',
             width: '100%',
             aspectRatio: '16 / 9',
-            bgcolor: '#111418',
+            bgcolor: (t) => tok(t).media,
             borderRadius: 1,
             overflow: 'hidden',
             display: 'grid',
@@ -303,12 +304,12 @@ function Stage({ meetingId, isHost, endLabel, deviceNotice }: { meetingId: strin
           {main && !audioOnly ? (
             <VideoTrack trackRef={main} style={{ width: '100%', height: '100%', objectFit: main.source === Track.Source.ScreenShare ? 'contain' : 'cover' }} />
           ) : (
-            <Typography sx={{ color: '#E8EAED', px: 4, textAlign: 'center' }}>
+            <Typography sx={{ color: (t) => tok(t)['on-media'], px: 4, textAlign: 'center' }}>
               {audioOnly ? t('audioOnlyOn') : host ? t('hostNoVideo', { name: host.name ?? '' }) : t('hostAbsent')}
             </Typography>
           )}
           {main && !audioOnly && (
-            <Typography variant="caption" sx={{ position: 'absolute', left: 8, bottom: 8, px: 2, py: 0.5, borderRadius: 1, bgcolor: 'rgba(0,0,0,0.65)', color: '#fff' }}>
+            <Typography variant="caption" sx={{ position: 'absolute', left: 8, bottom: 8, px: 2, py: 0.5, borderRadius: 1, bgcolor: (t) => tok(t)['media-label'], color: (t) => tok(t)['on-media'] }}>
               {main.participant.name}
               {main.source === Track.Source.ScreenShare ? ` · ${t('screen')}` : ''}
             </Typography>
@@ -320,9 +321,9 @@ function Stage({ meetingId, isHost, endLabel, deviceNotice }: { meetingId: strin
         {!audioOnly && others.length > 0 && (
           <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
             {others.map((ref) => (
-              <Box key={`${ref.participant.identity}-${ref.source}`} sx={{ position: 'relative', aspectRatio: '4 / 3', bgcolor: '#111418', borderRadius: 1, overflow: 'hidden' }}>
+              <Box key={`${ref.participant.identity}-${ref.source}`} sx={{ position: 'relative', aspectRatio: '4 / 3', bgcolor: (t) => tok(t).media, borderRadius: 1, overflow: 'hidden' }}>
                 <VideoTrack trackRef={ref} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <Typography variant="caption" sx={{ position: 'absolute', left: 6, bottom: 6, px: 1.5, borderRadius: 1, bgcolor: 'rgba(0,0,0,0.65)', color: '#fff' }}>
+                <Typography variant="caption" sx={{ position: 'absolute', left: 6, bottom: 6, px: 1.5, borderRadius: 1, bgcolor: (t) => tok(t)['media-label'], color: (t) => tok(t)['on-media'] }}>
                   {ref.participant.name}
                 </Typography>
               </Box>

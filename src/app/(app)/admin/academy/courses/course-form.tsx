@@ -32,7 +32,7 @@ export function CourseForm({ action, course }: { action: ServerAction; course?: 
         {course && <input type="hidden" name="id" value={course.id} />}
         <SourceLocaleField defaultValue={src} onChange={setSrc} />
         <Stack spacing={5} key={src}>
-          <TextField name="title" label={t('title')} defaultValue={text('title')} required maxLength={120} error={e.title} />
+          <TextField name="title" label={t('title')} hint={t('titleHint')} defaultValue={text('title')} required maxLength={120} error={e.title} />
           <TextAreaField name="summary" label={t('summary')} hint={t('summaryHint')} defaultValue={text('summary')} minRows={3} maxLength={500} error={e.summary} monospace={false} />
           <TextAreaField name="program" label={t('program')} hint={t('programHint')} defaultValue={text('program')} minRows={10} error={e.program} />
         </Stack>

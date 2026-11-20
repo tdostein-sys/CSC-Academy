@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { ArrowLeft, CheckCircle2, FileDown, XCircle } from 'lucide-react';
+import { CheckCircle2, FileDown, XCircle } from 'lucide-react';
 import { requireAmbassador } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Markdown } from '@/components/markdown';
@@ -15,7 +15,6 @@ import { ActionForm } from '@/components/forms/action-form';
 import { StatusBadge } from '@/components/status-badge';
 import { VideoEmbed } from '@/components/video-embed';
 import { Notice } from '@/components/ui/notice';
-import { LinkButton } from '@/components/ui/links';
 import { Collapsible } from '@/components/ui/collapsible';
 import { ListCard, SectionCard, SectionTitle } from '@/components/ui/section-card';
 import { formatDate, formatNumber, formatXAF } from '@/lib/format';
@@ -26,6 +25,8 @@ import { CAMPAIGN_COLUMNS, num, type Campaign, type CampaignBalance, type Payout
 import type { Locale } from '@/lib/types';
 import type { PaymentState } from '@/components/payment-badge';
 import { cancelSubmission, confirmPayout, setParticipation } from '../../actions';
+import { PageHeader } from '@/components/page-header';
+import { distinctFrom } from '@/lib/text';
 import { SubmissionForm } from './submission-form';
 
 export const metadata: Metadata = { title: 'Campagne' };
@@ -38,25 +39,23 @@ export default async function AmbassadorCampaignPage({ params }: { params: Promi
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const user = await requireAmbassador(`/ambassador/campaigns/${id}`);
-  const [locale, supabase, t] = await Promise.all([getLocale(), createClient(), getTranslations('ambassador')]);
+  const [locale, supabase, t, tn] = await Promise.all([getLocale(), createClient(), getTranslations('ambassador'), getTranslations('nav')]);
   const l = locale as Locale;
 
-  // La RLS ne renvoie que les campagnes lancées ou clôturées.
-  const { data: campaign } = await supabase.from('campaigns').select(CAMPAIGN_COLUMNS).eq('id', id).maybeSingle();
-  if (!campaign) notFound();
-  const c = campaign as Campaign;
-
-  // Vue comptée une seule fois (la fonction ignore les doublons).
-  await supabase.rpc('record_campaign_view', { p_campaign: id });
-
-  const [partRes, subsRes, payoutsRes, balRes, fileRes, statesRes] = await Promise.all([
+  // Lectures en parallèle. La RLS ne renvoie que les campagnes lancées ou
+  // clôturées ; la vue est comptée une seule fois (doublons ignorés).
+  const [{ data: campaign }, , partRes, subsRes, payoutsRes, balRes, statesRes] = await Promise.all([
+    supabase.from('campaigns').select(CAMPAIGN_COLUMNS).eq('id', id).maybeSingle(),
+    supabase.rpc('record_campaign_view', { p_campaign: id }),
     supabase.from('campaign_participations').select('participates').eq('campaign_id', id).eq('ambassador_id', user.id).maybeSingle(),
     supabase.from('submissions').select('*').eq('campaign_id', id).eq('ambassador_id', user.id).order('created_at', { ascending: false }),
     supabase.from('payouts').select('*').eq('campaign_id', id).eq('ambassador_id', user.id).order('paid_at', { ascending: false }),
     supabase.from('ambassador_campaign_balances').select('*').eq('campaign_id', id).eq('ambassador_id', user.id).maybeSingle(),
-    c.modop_file_path ? supabase.storage.from('campaign-files').createSignedUrl(c.modop_file_path, 3600) : Promise.resolve({ data: null }),
     supabase.from('submission_payment_states').select('submission_id, payment_state').eq('campaign_id', id).eq('ambassador_id', user.id),
   ]);
+  if (!campaign) notFound();
+  const c = campaign as Campaign;
+  const fileRes = c.modop_file_path ? await supabase.storage.from('campaign-files').createSignedUrl(c.modop_file_path, 3600) : { data: null };
   const paymentState = new Map((statesRes.data ?? []).map((s) => [s.submission_id as string, s.payment_state as PaymentState]));
 
   const participates = (partRes.data?.participates as boolean | undefined) ?? null;
@@ -68,8 +67,9 @@ export default async function AmbassadorCampaignPage({ params }: { params: Promi
   const fileUrl = fileRes.data?.signedUrl ?? null;
 
   const title = localized(l, c.title_fr, c.title_en);
-  const summary = localized(l, c.summary_fr, c.summary_en);
-  const modop = localized(l, c.modop_fr, c.modop_en);
+  // Un résumé ou un mode opératoire identique au titre n'apporte rien : on ne le répète pas.
+  const summary = distinctFrom(localized(l, c.summary_fr, c.summary_en), title);
+  const modop = distinctFrom(localized(l, c.modop_fr, c.modop_en), title, summary);
   const video = parseVideoUrl(c.video_url);
   const isOpen = c.status === 'launched';
   const isActive = user.ambassador.status === 'active';
@@ -77,24 +77,19 @@ export default async function AmbassadorCampaignPage({ params }: { params: Promi
 
   return (
     <Stack spacing={6} sx={{ maxWidth: 860 }}>
-      <Box>
-        <LinkButton href="/ambassador" size="small" startIcon={<ArrowLeft aria-hidden size={16} />}>
-          {t('campaign.back')}
-        </LinkButton>
-      </Box>
-
-      <Box component="header">
-        <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-          <StatusBadge tone={c.status}>{t(`campaignStatus.${c.status}`)}</StatusBadge>
-          <StatusBadge tone="info">{t('campaigns.perAccount', { amount: formatXAF(c.amount_per_account, l) })}</StatusBadge>
-          {c.min_volume !== null && <StatusBadge tone="neutral">{t('campaigns.minVolume', { volume: formatNumber(c.min_volume, l) })}</StatusBadge>}
-          {c.ends_on && <StatusBadge tone="neutral">{t('campaigns.endsOn', { date: formatDate(c.ends_on, l) })}</StatusBadge>}
-        </Box>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-          {title}
-        </Typography>
-        {summary && <Typography sx={{ mt: 2, color: 'text.secondary' }}>{summary}</Typography>}
-      </Box>
+      <PageHeader
+        breadcrumbs={[{ label: tn('ambassador'), href: '/ambassador' }, { label: title }]}
+        eyebrow={
+          <>
+            <StatusBadge tone={c.status}>{t(`campaignStatus.${c.status}`)}</StatusBadge>
+            <StatusBadge tone="info">{t('campaigns.perAccount', { amount: formatXAF(c.amount_per_account, l) })}</StatusBadge>
+            {c.min_volume !== null && <StatusBadge tone="neutral">{t('campaigns.minVolume', { volume: formatNumber(c.min_volume, l) })}</StatusBadge>}
+            {c.ends_on && <StatusBadge tone="neutral">{t('campaigns.endsOn', { date: formatDate(c.ends_on, l) })}</StatusBadge>}
+          </>
+        }
+        title={title}
+        subtitle={summary || undefined}
+      />
 
       {!isOpen && <Notice tone="info">{t('campaign.closedNotice')}</Notice>}
       {isOpen && !isActive && <Notice tone="error">{t('campaign.suspendedNotice')}</Notice>}

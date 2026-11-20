@@ -86,11 +86,11 @@ export function StatCard({
       }}
     >
       <CardContent sx={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-        <Avatar variant="rounded" sx={(theme) => ({ width: 52, height: 52, borderRadius: 2, bgcolor: tok(theme)[bgKey], color: tok(theme)[fgKey] })}>
+        <Avatar variant="rounded" sx={(theme) => ({ width: 48, height: 48, borderRadius: '12px', bgcolor: tok(theme)[bgKey], color: tok(theme)[fgKey] })}>
           <Icon aria-hidden size={26} />
         </Avatar>
         <Box sx={{ minWidth: 0 }}>
-          <Typography variant="caption" component="p" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.4px', fontWeight: 600 }}>
+          <Typography variant="caption" component="p" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             {label}
           </Typography>
           <Typography variant="h4" component="p" sx={{ fontWeight: 700, lineHeight: 1.2, ...(highlight && { color: 'error.main' }) }}>

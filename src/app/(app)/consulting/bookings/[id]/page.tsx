@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ArrowLeft, Video } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { Markdown } from '@/components/markdown';
@@ -33,6 +32,7 @@ import {
   type Settings,
 } from '@/lib/consulting/types';
 import type { Locale } from '@/lib/types';
+import { PageHeader } from '@/components/page-header';
 import { cancelMyBooking, rescheduleMyBooking } from '../../actions';
 
 export const metadata: Metadata = { title: 'Mon rendez-vous' };
@@ -45,18 +45,18 @@ export default async function MyBookingPage({ params, searchParams }: { params: 
   const [{ id }, flags] = await Promise.all([params, searchParams]);
   if (!UUID.test(id)) notFound();
   const user = await requireUser(`/consulting/bookings/${id}`);
-  const [t, locale, supabase] = await Promise.all([getTranslations('consulting'), getLocale(), createClient()]);
+  const [t, tn, locale, supabase] = await Promise.all([getTranslations('consulting'), getTranslations('nav'), getLocale(), createClient()]);
   const l = locale as Locale;
 
-  // La vue ne renvoie au client que ses propres rendez-vous.
-  const { data } = await supabase.from('consulting_booking_details').select('*').eq('id', id).eq('client_id', user.id).maybeSingle();
-  const b = data as BookingDetails | null;
-  if (!b) notFound();
-
-  const [{ data: settingsData }, { data: eventsData }] = await Promise.all([
+  // En parallèle. La vue ne renvoie au client que ses propres rendez-vous ;
+  // l'historique est protégé par la RLS.
+  const [{ data }, { data: settingsData }, { data: eventsData }] = await Promise.all([
+    supabase.from('consulting_booking_details').select('*').eq('id', id).eq('client_id', user.id).maybeSingle(),
     supabase.from('consulting_settings').select(SETTINGS_COLUMNS).maybeSingle(),
     supabase.from('consulting_booking_events').select('id, booking_id, event, data, created_at').eq('booking_id', id).order('id'),
   ]);
+  const b = data as BookingDetails | null;
+  if (!b) notFound();
   const settings = settingsData as Settings | null;
   const events = (eventsData ?? []) as BookingEvent[];
 
@@ -74,20 +74,12 @@ export default async function MyBookingPage({ params, searchParams }: { params: 
 
   return (
     <Stack spacing={6}>
-      <Box>
-        <LinkButton href="/consulting/bookings" size="small" startIcon={<ArrowLeft aria-hidden size={16} />} sx={{ mb: 3 }}>
-          {t('bookings.title')}
-        </LinkButton>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 3 }}>
-          <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
-            {localized(l, b.offer_title_fr, b.offer_title_en)}
-          </Typography>
-          <BookingStatusBadge status={b.status} endsAt={b.ends_at} />
-        </Box>
-        <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-          {bookingRef(b.ref)} · {formatDate(b.starts_at, l, true)}
-        </Typography>
-      </Box>
+      <PageHeader
+        breadcrumbs={[{ label: tn('consulting'), href: '/consulting' }, { label: tn('tabs.myAppointments'), href: '/consulting/bookings' }, { label: bookingRef(b.ref) }]}
+        eyebrow={<BookingStatusBadge status={b.status} endsAt={b.ends_at} />}
+        title={localized(l, b.offer_title_fr, b.offer_title_en)}
+        subtitle={`${bookingRef(b.ref)} · ${formatDate(b.starts_at, l, true)}`}
+      />
 
       {flags.booked && <Notice tone="success">{b.status === 'confirmed' ? t('detail.bookedConfirmed') : t('detail.bookedPending')}</Notice>}
       {flags.cancelled && <Notice tone="success">{b.paid ? t('detail.cancelledRefund') : t('detail.cancelledDone')}</Notice>}

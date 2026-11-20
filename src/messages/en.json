@@ -39,7 +39,7 @@
     "academy": "Academy",
     "consulting": "Consulting",
     "ga": "Asset management",
-    "dashboard": "My space",
+    "dashboard": "Overview",
     "notifications": "Notifications",
     "profile": "My profile",
     "admin": "Administration",
@@ -50,7 +50,27 @@
     "student": "My courses",
     "contact": "Contact",
     "appointments": "My appointments",
-    "consultations": "Consultations"
+    "consultations": "Consultations",
+    "overview": "Overview",
+    "myActivities": "My activities",
+    "ourActivities": "Our activities",
+    "account": "Account",
+    "profileSecurity": "Profile & security",
+    "unreadSuffix": "unread",
+    "tabs": {
+      "catalogue": "Catalogue",
+      "myCourses": "My courses",
+      "offers": "Offers",
+      "myAppointments": "My appointments",
+      "consultations": "Consultations"
+    },
+    "help": {
+      "title": "Need help?",
+      "hours": "Mon–Sat, 8 am–6 pm (Cameroon time)",
+      "whatsapp": "Message us on WhatsApp",
+      "whatsappMessage": "Hello CSC, I have a question.",
+      "contactPage": "Contact page"
+    }
   },
   "home": {
     "heroTitle": "Learn, invest and grow with CSC",
@@ -269,7 +289,10 @@
         "wow": "Surprised",
         "party": "Celebrate"
       }
-    }
+    },
+    "goToMyCourse": "Go to my course",
+    "programChapters": "{count, plural, one {# chapter} other {# chapters}}",
+    "programChapterLabel": "Chapter {n}:"
   },
   "auth": {
     "loginTitle": "Log in",
@@ -895,7 +918,9 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "userMenu": "User menu",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "loadingPage": "Loading page…",
+    "breadcrumb": "Breadcrumb"
   },
   "student": {
     "title": "My courses",
@@ -994,7 +1019,8 @@
     "replayRetry": "Restart playback",
     "replayProtection": "This replay is reserved for students of this course: please do not share it.",
     "payWhatsapp": "Pay via WhatsApp",
-    "payContact": "Send a message to CSC"
+    "payContact": "Send a message to CSC",
+    "mySpaceCrumb": "My course space"
   },
   "adminAcademy": {
     "saved": "Changes saved.",
@@ -1037,11 +1063,12 @@
       "summary": "Summary",
       "summaryHint": "One or two sentences shown in the catalogue.",
       "program": "Programme",
-      "programHint": "Simple formatting: \"## Heading\", \"- item\".",
+      "programHint": "One chapter per line, with its duration: “Chapter 1: Introduction to crypto – 1 h” or “1. Introduction – 1 h 30”. The programme is then shown as a numbered list with the total duration.",
       "level": "Level",
       "create": "Create course",
       "createTitle": "New course",
-      "createHint": "Describe the course. You will then add one or more sessions (dates, seats, price)."
+      "createHint": "Describe the course. You will then add one or more sessions (dates, seats, price).",
+      "titleHint": "Write the title in sentence case (capital letter at the start only). E.g. “Crypto ecosystem & using Binance”."
     },
     "course": {
       "back": "Courses",

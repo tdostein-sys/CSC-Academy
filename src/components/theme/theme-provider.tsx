@@ -72,8 +72,22 @@ export function AppThemeProvider({
         <GlobalStyles
           styles={{
             'html, body': { minHeight: '100%' },
+            // Chiffres tabulaires partout : montants, dates et tableaux restent alignés.
+            body: { fontVariantNumeric: 'tabular-nums', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale' },
             a: { color: theme.palette.primary.main },
-            ':focus-visible': { outline: `2px solid ${theme.palette.primary.main}`, outlineOffset: 2 },
+            // Icônes Lucide : trait affiné (1,75) par défaut ; une épaisseur choisie explicitement est conservée.
+            'svg.lucide[stroke-width="2"]': { strokeWidth: 1.75 },
+            // Anneau de focus visible sur tout élément interactif (2 px, décalé de 2 px).
+            ':focus-visible': { outline: `2px solid ${theme.palette.primary.main}`, outlineOffset: 2, borderRadius: 4 },
+            // Animations et transitions désactivées si l'utilisateur l'a demandé.
+            '@media (prefers-reduced-motion: reduce)': {
+              '*, *::before, *::after': {
+                animationDuration: '0.01ms !important',
+                animationIterationCount: '1 !important',
+                transitionDuration: '0.01ms !important',
+                scrollBehavior: 'auto !important',
+              },
+            },
             // Cases à cocher et boutons radio natifs (questionnaire) : couleur principale du thème.
             'input[type="checkbox"], input[type="radio"]': { accentColor: theme.palette.primary.main },
             '.sr-only': {

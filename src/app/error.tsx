@@ -4,10 +4,9 @@ import { useTranslations } from 'next-intl';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { TextLink } from '@/components/ui/links';
-import { ErrorIllustration } from '@/components/error-illustration';
 
 /** Page d'erreur : illustration, message simple, bouton « Réessayer ». Aucun détail technique affiché. */
 export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -20,7 +19,9 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
       <Box sx={{ mb: 6 }}>
         <Logo size={56} />
       </Box>
-      <ErrorIllustration />
+      <Box aria-hidden sx={{ width: 56, height: 56, borderRadius: '14px', display: 'grid', placeItems: 'center', bgcolor: 'warning.light', color: 'warning.main' }}>
+        <AlertTriangle size={28} strokeWidth={1.75} />
+      </Box>
       <Typography variant="h4" component="h1" sx={{ mt: 6, mb: 2, fontWeight: 700 }}>
         {t('errorTitle')}
       </Typography>
@@ -31,15 +32,6 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
         variant="contained"
         size="large"
         startIcon={<RefreshCw aria-hidden size={20} />}
-        sx={(theme) => ({
-          px: 7,
-          py: 2,
-          borderRadius: 3,
-          textTransform: 'none',
-          fontSize: '1rem',
-          fontWeight: 600,
-          boxShadow: theme.palette.mode === 'dark' ? '0 8px 20px rgba(110,168,255,.28)' : '0 8px 20px rgba(29,95,214,.3)',
-        })}
       >
         {t('retry')}
       </Button>

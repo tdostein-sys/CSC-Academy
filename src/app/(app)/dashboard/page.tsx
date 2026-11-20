@@ -17,7 +17,8 @@ export default async function DashboardPage() {
   const user = await requireUser('/dashboard');
   const t = await getTranslations('dashboard');
 
-  const roles: string[] = ['user'];
+  // Le rôle « utilisateur » est implicite : seuls les rôles distinctifs sont affichés.
+  const roles: string[] = [];
   if (user.ambassador) roles.push('ambassador');
   if (user.isAdmin) roles.push('admin');
 
@@ -35,14 +36,15 @@ export default async function DashboardPage() {
       <PageHeader
         title={t('hello', { name: user.profile.first_name || user.profile.username || '' })}
         subtitle={
-          <Box component="span" sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
-            <span>{t('rolesLabel')} :</span>
-            {roles.map((r) => (
-              <StatusBadge key={r} tone={r === 'admin' ? 'accent' : 'primary'}>
-                {t(`roles.${r}`)}
-              </StatusBadge>
-            ))}
-          </Box>
+          roles.length > 0 ? (
+            <Box component="span" sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2 }}>
+              {roles.map((r) => (
+                <StatusBadge key={r} tone={r === 'admin' ? 'accent' : 'primary'}>
+                  {t(`roles.${r}`)}
+                </StatusBadge>
+              ))}
+            </Box>
+          ) : undefined
         }
       />
       <Grid container spacing={6}>

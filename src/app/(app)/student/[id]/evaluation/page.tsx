@@ -127,7 +127,7 @@ export default async function StudentEvaluationPage({ params }: { params: Promis
                             name={`q_${q.id}`}
                             value={String(i)}
                             required={!q.multiple}
-                            sx={{ mt: '3px', width: 18, height: 18, flexShrink: 0, accentColor: 'var(--mui-palette-primary-main, #1d5fd6)' }}
+                            sx={{ mt: '3px', width: 18, height: 18, flexShrink: 0 }}
                           />
                           <Typography component="span" variant="body2">
                             {localized(l, c.label_fr, c.label_en)}

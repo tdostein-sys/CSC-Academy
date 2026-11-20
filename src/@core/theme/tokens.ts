@@ -1,88 +1,102 @@
+import { BRAND, BRANDS } from './brand'
+
 /**
- * Palette de l'interface.
- *   Clair : maquette « tableau de bord » bleu / bleu nuit — bleu principal
- *   #1d5fd6, menu latéral bleu nuit #0f1c3f, violet #5b3fc4 (information).
- *   Sombre : mêmes bleus, en nuances de bleu nuit plus lumineuses — bleu
- *   principal #6ea8ff, menu latéral bleu nuit #0c1733, violet doux #c4b5fd.
- *   Dans les deux : vert, rouge, ambre pour les états ; or CSC en accent.
+ * Jetons de couleur — direction artistique « Premium FinTech » (refonte UI).
+ *   Base sobre (encre marine, surfaces claires), couleur d'action issue de
+ *   `brand.ts` (émeraude du logo par défaut), or réservé aux distinctions
+ *   (« Bientôt », attestation), statuts sur fonds teintés.
+ *
+ * Trois niveaux de surface : `surface` = fond de page, `bg` = cartes,
+ * `surface-2` = zones surélevées / grisées. Les jetons `nav-*` décrivent le
+ * menu latéral marine (identique dans les deux thèmes, bordure droite en sombre).
  *
  * Contrastes vérifiés automatiquement WCAG AA (tests/unit/theme-contrast.test.ts).
- * L'or n'est JAMAIS utilisé comme couleur de texte sur fond clair : uniquement
- * en fond, avec texte foncé.
- *
- * Correspondance Sneat : `bg` = papier (cartes), `surface` = fond de page.
- * Les jetons `nav-*` décrivent le menu latéral bleu nuit.
+ * Aucune couleur en dur dans les pages : tout passe par le thème ou ces jetons.
  */
+const brand = BRANDS[BRAND]
+
 export const tokens = {
   light: {
-    bg: '#ffffff',
-    surface: '#f3f6fb',
-    'surface-2': '#e9eff8',
-    border: '#e0e6f0',
-    text: '#16213a',
-    muted: '#53627c',
-    primary: '#1d5fd6',
-    'primary-hover': '#174fb5',
-    'primary-fg': '#ffffff',
-    'primary-soft': '#e6effd',
-    secondary: '#5b3fc4',
-    'secondary-fg': '#ffffff',
-    accent: '#f5c211',
-    'accent-hover': '#e0b00c',
-    'accent-fg': '#1a1500',
-    'accent-soft': '#fdf3c8',
-    success: '#15803d',
-    'success-soft': '#dcfce7',
-    warning: '#a14b06',
-    'warning-soft': '#fef3c7',
-    error: '#c81e1e',
-    'error-soft': '#fee2e2',
-    info: '#5b3fc4',
-    'info-soft': '#ede9fe',
-    'on-status': '#ffffff',
-    'nav-bg': '#0f1c3f',
-    'nav-text': '#e6ecf7',
-    'nav-muted': '#9aabc9',
-    'nav-hover': '#1a2a52',
-    'nav-active-from': '#1d5fd6',
-    'nav-active-to': '#2f6fe4',
-    'nav-active-fg': '#ffffff'
+    bg: '#FFFFFF',
+    surface: '#F5F7FA',
+    'surface-2': '#F8FAFC',
+    border: '#E4E8EF',
+    text: '#0B1526',
+    muted: '#5B6577',
+    ...brand.light,
+    secondary: '#1E44A8',
+    'secondary-fg': '#FFFFFF',
+    accent: '#F2C14E',
+    'accent-hover': '#E5B23A',
+    'accent-fg': '#3A2A00',
+    'accent-soft': '#FDF3D6',
+    success: '#06603F',
+    'success-soft': '#E7F5EF',
+    warning: '#8A4B04',
+    'warning-soft': '#FEF3C7',
+    error: '#A42A20',
+    'error-soft': '#FDECEA',
+    info: '#1E44A8',
+    'info-soft': '#E8EEFB',
+    neutral: '#46505F',
+    'neutral-soft': '#EEF1F5',
+    'on-status': '#FFFFFF',
+    'nav-bg': '#0A1628',
+    'nav-border': '#0A1628',
+    'nav-text': '#E8EDF5',
+    'nav-muted': '#9AA7BC',
+    'nav-hover': '#13233B',
+    'nav-active-fg': '#FFFFFF',
+    'nav-section': '#8C9AB2',
+    // Lien d'action dans le menu marine (variante claire de la couleur d'action).
+    'nav-link': brand.dark.primary,
+    // Fond des vignettes vidéo (visio, replays) et texte posé dessus.
+    media: '#0B1220',
+    'on-media': '#FFFFFF',
+    'media-label': 'rgba(0, 0, 0, 0.65)',
+    // Graphiques : palette validée (daltonisme, contraste) sur fonds clair et sombre.
+    'chart-1': '#2a78d6',
+    'chart-2': '#eb6834'
   },
-  // Sombre : mêmes bleus que le clair, en nuances de bleu nuit lumineuses ;
-  // cartes nettement plus claires que le fond de page pour bien les distinguer.
   dark: {
-    bg: '#182644',
-    surface: '#0e182e',
-    'surface-2': '#213257',
-    border: '#30436a',
-    text: '#eef3fc',
-    muted: '#b4c3df',
-    primary: '#6ea8ff',
-    'primary-hover': '#8dbbff',
-    'primary-fg': '#071430',
-    'primary-soft': '#1c386a',
-    secondary: '#c4b5fd',
-    'secondary-fg': '#140c33',
-    accent: '#ffcb2e',
-    'accent-hover': '#ffd658',
-    'accent-fg': '#1a1500',
-    'accent-soft': '#3d3415',
-    success: '#5ee39a',
-    'success-soft': '#123a2c',
-    warning: '#ffc247',
-    'warning-soft': '#3f3214',
-    error: '#ff8f8f',
-    'error-soft': '#47202b',
-    info: '#c4b5fd',
-    'info-soft': '#2e2858',
-    'on-status': '#0e182e',
-    'nav-bg': '#0c1733',
-    'nav-text': '#eef3fc',
-    'nav-muted': '#a5b4d0',
-    'nav-hover': '#1a284c',
-    'nav-active-from': '#1d5fd6',
-    'nav-active-to': '#2f6fe4',
-    'nav-active-fg': '#ffffff'
+    bg: '#0F1A2C',
+    surface: '#070E1A',
+    'surface-2': '#16243A',
+    border: '#25344D',
+    text: '#E8EDF5',
+    muted: '#9AA7BC',
+    ...brand.dark,
+    secondary: '#8DB4FF',
+    'secondary-fg': '#071430',
+    accent: '#F2C14E',
+    'accent-hover': '#F5CD6B',
+    'accent-fg': '#3A2A00',
+    'accent-soft': '#2A2210',
+    success: '#5BE0AE',
+    'success-soft': '#0E3326',
+    warning: '#F2C14E',
+    'warning-soft': '#2A2210',
+    error: '#FF8A80',
+    'error-soft': '#3A1515',
+    info: '#8DB4FF',
+    'info-soft': '#14244A',
+    neutral: '#B8C3D6',
+    'neutral-soft': '#1C2A42',
+    'on-status': '#070E1A',
+    'nav-bg': '#0A1628',
+    'nav-border': '#25344D',
+    'nav-text': '#E8EDF5',
+    'nav-muted': '#9AA7BC',
+    'nav-hover': '#13233B',
+    'nav-active-fg': '#FFFFFF',
+    'nav-section': '#8C9AB2',
+    // Lien d'action dans le menu marine (variante claire de la couleur d'action).
+    'nav-link': brand.dark.primary,
+    media: '#0B1220',
+    'on-media': '#FFFFFF',
+    'media-label': 'rgba(0, 0, 0, 0.65)',
+    'chart-1': '#3987e5',
+    'chart-2': '#d95926'
   }
 } as const
 

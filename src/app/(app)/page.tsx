@@ -33,7 +33,7 @@ export default async function HomePage() {
               <Typography variant="h4" component="h1" sx={{ fontWeight: 700, color: 'primary.main', mb: 3 }}>
                 {t('heroTitle')}
               </Typography>
-              <Box aria-hidden sx={{ width: 80, height: 6, borderRadius: 3, bgcolor: '#f5c211', mb: 4 }} />
+              <Box aria-hidden sx={{ width: 80, height: 6, borderRadius: 3, bgcolor: 'primary.main', mb: 4 }} />
               <Typography sx={{ color: 'text.secondary', fontSize: { sm: '1.0625rem' }, mb: 6 }}>{t('heroSubtitle')}</Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
                 <LinkButton href={user ? '/dashboard' : '/auth/register'} variant="contained" size="large">

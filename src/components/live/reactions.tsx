@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react';
 import Box from '@mui/material/Box';
+import { tok } from '@/@core/theme/tokens';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
@@ -51,7 +52,7 @@ export function ReactionOverlay({ items }: { items: FloatingReaction[] }) {
           </Box>
           <Box
             component="span"
-            sx={{ maxWidth: 140, px: 1.5, py: 0.25, borderRadius: 1, bgcolor: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            sx={{ maxWidth: 140, px: 1.5, py: 0.25, borderRadius: 1, bgcolor: (t) => tok(t)['media-label'], color: (t) => tok(t)['on-media'], fontSize: 12, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
             {r.name}
           </Box>

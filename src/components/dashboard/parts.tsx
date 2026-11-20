@@ -101,7 +101,7 @@ export function Ranking({ columns, rows, emptyLabel }: { columns: string[]; rows
           borderCollapse: 'collapse',
           typography: 'body2',
           '& th, & td': { py: 1.5, px: 2, borderBottom: 1, borderColor: 'divider', textAlign: 'right', whiteSpace: 'nowrap' },
-          '& th': { color: 'text.secondary', fontWeight: 600, typography: 'caption', textTransform: 'uppercase' },
+          '& th': { color: 'text.secondary', fontWeight: 600, fontSize: '0.75rem' },
           '& th:first-of-type, & td:first-of-type': { textAlign: 'left', whiteSpace: 'normal', pl: 0 },
           '& td': { fontVariantNumeric: 'tabular-nums' },
           '& tr:last-of-type td': { borderBottom: 0 },

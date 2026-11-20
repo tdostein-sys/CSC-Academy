@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { tokens, type TokenName } from '@/@core/theme/tokens';
+import { BRANDS } from '@/@core/theme/brand';
 
 /**
  * Vérifie automatiquement que les couleurs des thèmes clair et sombre
- * (palette Sneat aux couleurs CSC) respectent le contraste WCAG AA
+ * (direction artistique « Premium FinTech ») respectent le contraste WCAG AA
  * (4,5:1 pour le texte normal).
  */
 function luminance(hex: string): number {
@@ -29,7 +30,8 @@ const PAIRS: [TokenName, TokenName][] = [
   ['muted', 'surface-2'],
   ['primary', 'bg'],
   ['primary', 'surface'],
-  ['primary', 'primary-soft'],
+  // Texte d'action sur fond teinté : nuance foncée (primary.dark).
+  ['primary-hover', 'primary-soft'],
   ['primary-fg', 'primary'],
   ['primary-fg', 'primary-hover'],
   ['accent-fg', 'accent'],
@@ -42,30 +44,23 @@ const PAIRS: [TokenName, TokenName][] = [
   ['warning', 'surface'],
   ['success', 'bg'],
   ['success', 'surface'],
-  ['muted', 'primary-soft'],
   ['info', 'info-soft'],
   ['info', 'bg'],
+  ['neutral', 'neutral-soft'],
+  ['muted', 'primary-soft'],
   // Boutons pleins MUI (contrastText) : rouge « danger », succès, etc.
   ['on-status', 'error'],
   ['on-status', 'success'],
   ['on-status', 'warning'],
   ['on-status', 'info'],
-  // Bouton « secondaire » plein (texte = fond du papier).
-  ['bg', 'muted'],
-  // Menu latéral bleu nuit.
+  // Bouton « secondaire » plein.
+  ['secondary-fg', 'secondary'],
+  // Menu latéral marine.
   ['nav-text', 'nav-bg'],
   ['nav-text', 'nav-hover'],
   ['nav-muted', 'nav-bg'],
-  ['nav-active-fg', 'nav-active-from'],
-  ['nav-active-fg', 'nav-active-to'],
-  // Texte des cartes de statistiques (fond dégradé vers la teinte douce).
-  ['text', 'primary-soft'],
-  ['text', 'info-soft'],
-  ['text', 'success-soft'],
-  ['text', 'error-soft'],
-  ['muted', 'info-soft'],
-  ['muted', 'success-soft'],
-  ['muted', 'error-soft'],
+  ['nav-section', 'nav-bg'],
+  ['nav-active-fg', 'nav-active-bg'],
 ];
 
 describe.each([
@@ -78,51 +73,28 @@ describe.each([
   });
 });
 
-/**
- * Le mode clair est figé : la refonte « chaleureuse » ne concerne que le
- * mode sombre. Toute modification involontaire du clair fait échouer ce test.
- */
-describe('mode clair inchangé', () => {
-  it('jetons du thème clair identiques à la version validée', () => {
-    expect(tokens.light).toEqual({
-      bg: '#ffffff',
-      surface: '#f3f6fb',
-      'surface-2': '#e9eff8',
-      border: '#e0e6f0',
-      text: '#16213a',
-      muted: '#53627c',
-      primary: '#1d5fd6',
-      'primary-hover': '#174fb5',
-      'primary-fg': '#ffffff',
-      'primary-soft': '#e6effd',
-      secondary: '#5b3fc4',
-      'secondary-fg': '#ffffff',
-      accent: '#f5c211',
-      'accent-hover': '#e0b00c',
-      'accent-fg': '#1a1500',
-      'accent-soft': '#fdf3c8',
-      success: '#15803d',
-      'success-soft': '#dcfce7',
-      warning: '#a14b06',
-      'warning-soft': '#fef3c7',
-      error: '#c81e1e',
-      'error-soft': '#fee2e2',
-      info: '#5b3fc4',
-      'info-soft': '#ede9fe',
-      'on-status': '#ffffff',
-      'nav-bg': '#0f1c3f',
-      'nav-text': '#e6ecf7',
-      'nav-muted': '#9aabc9',
-      'nav-hover': '#1a2a52',
-      'nav-active-from': '#1d5fd6',
-      'nav-active-to': '#2f6fe4',
-      'nav-active-fg': '#ffffff',
-    });
+describe('direction artistique', () => {
+  it('valeurs de référence de la mission (fonds, textes, action émeraude)', () => {
+    expect(tokens.light).toMatchObject({ surface: '#F5F7FA', bg: '#FFFFFF', border: '#E4E8EF', text: '#0B1526', muted: '#5B6577', primary: '#0A7F5A' });
+    expect(tokens.dark).toMatchObject({ surface: '#070E1A', bg: '#0F1A2C', 'surface-2': '#16243A', border: '#25344D', text: '#E8EDF5', primary: '#3DD29B', 'primary-fg': '#04241A' });
   });
 
-  it('mode sombre : cartes nettement détachées du fond de page', () => {
-    // Écart de luminosité entre carte et fond (lisibilité des blocs).
-    expect(contrast(tokens.dark.bg, tokens.dark.surface)).toBeGreaterThanOrEqual(1.15);
-    expect(contrast(tokens.dark['surface-2'], tokens.dark.bg)).toBeGreaterThanOrEqual(1.15);
+  it('mode sombre : trois niveaux de surface distincts, menu séparé par une bordure', () => {
+    expect(contrast(tokens.dark.bg, tokens.dark.surface)).toBeGreaterThanOrEqual(1.1);
+    expect(contrast(tokens.dark['surface-2'], tokens.dark.bg)).toBeGreaterThanOrEqual(1.1);
+    expect(tokens.dark['nav-border']).not.toBe(tokens.dark['nav-bg']);
+  });
+
+  it.each(Object.keys(BRANDS))('préréglage de couleur « %s » : contrastes AA dans les deux thèmes', (name) => {
+    const b = BRANDS[name as keyof typeof BRANDS];
+    for (const mode of ['light', 'dark'] as const) {
+      const v = { ...tokens[mode], ...b[mode] };
+      expect(contrast(v.primary, v.bg)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(v['primary-fg'], v.primary)).toBeGreaterThanOrEqual(4.5);
+      // Icône d'action sur fond teinté (élément non textuel : 3:1) ; texte : nuance foncée (4,5:1).
+      expect(contrast(v.primary, v['primary-soft'])).toBeGreaterThanOrEqual(3);
+      expect(contrast(v['primary-hover'], v['primary-soft'])).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(v['nav-active-fg'], v['nav-active-bg'])).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });

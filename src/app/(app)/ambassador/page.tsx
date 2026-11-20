@@ -151,7 +151,7 @@ export default async function AmbassadorPage() {
             <BadgeCheck aria-hidden size={36} />
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="caption" component="p" sx={{ fontWeight: 700, color: 'primary.main', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <Typography variant="overline" component="p" sx={{ color: 'primary.main', lineHeight: 1.5 }}>
               {t('badge')}
             </Typography>
             <Typography variant="h4" component="p" sx={{ fontWeight: 700, letterSpacing: '1px' }}>

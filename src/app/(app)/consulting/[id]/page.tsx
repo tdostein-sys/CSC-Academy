@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSessionUser } from '@/lib/auth';
 import { Markdown } from '@/components/markdown';
@@ -19,6 +18,7 @@ import { localized } from '@/lib/localized';
 import { loadSlotDays } from '@/lib/consulting/slots';
 import { OFFER_COLUMNS, SETTINGS_COLUMNS, UUID, num, type Offer, type Settings } from '@/lib/consulting/types';
 import type { Locale } from '@/lib/types';
+import { PageHeader } from '@/components/page-header';
 import { bookSlot } from '../actions';
 
 export const metadata: Metadata = { title: 'CSC Consulting' };
@@ -28,7 +28,7 @@ export const dynamic = 'force-dynamic';
 export default async function OfferPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID.test(id)) notFound();
-  const [t, locale, supabase, user] = await Promise.all([getTranslations('consulting'), getLocale(), createClient(), getSessionUser()]);
+  const [t, tn, locale, supabase, user] = await Promise.all([getTranslations('consulting'), getTranslations('nav'), getLocale(), createClient(), getSessionUser()]);
   const l = locale as Locale;
 
   const [{ data: offerData }, { data: settingsData }] = await Promise.all([
@@ -54,18 +54,16 @@ export default async function OfferPage({ params }: { params: Promise<{ id: stri
 
   return (
     <Stack spacing={6}>
-      <Box>
-        <LinkButton href="/consulting" size="small" startIcon={<ArrowLeft aria-hidden size={16} />} sx={{ mb: 3 }}>
-          {t('backCatalog')}
-        </LinkButton>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-          <StatusBadge tone="primary">{t(`category.${offer.category}`)}</StatusBadge>
-          {offer.once_per_client && <StatusBadge tone="info">{t('oncePerClient')}</StatusBadge>}
-        </Box>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-          {localized(l, offer.title_fr, offer.title_en)}
-        </Typography>
-      </Box>
+      <PageHeader
+        breadcrumbs={[{ label: tn('consulting'), href: '/consulting' }, { label: tn('tabs.offers'), href: '/consulting' }, { label: localized(l, offer.title_fr, offer.title_en) }]}
+        eyebrow={
+          <>
+            <StatusBadge tone="neutral">{t(`category.${offer.category}`)}</StatusBadge>
+            {offer.once_per_client && <StatusBadge tone="info">{t('oncePerClient')}</StatusBadge>}
+          </>
+        }
+        title={localized(l, offer.title_fr, offer.title_en)}
+      />
 
       <Grid container spacing={6}>
         <Grid item xs={12} lg={7}>

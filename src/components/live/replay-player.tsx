@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import { useTheme } from '@mui/material/styles';
+import { tok } from '@/@core/theme/tokens';
 import { RotateCcw } from 'lucide-react';
 import { Notice } from '@/components/ui/notice';
 
@@ -22,6 +24,7 @@ interface Props {
  * et la page se met à jour (« Déjà visionné »).
  */
 export function ReplayPlayer({ src, until, title, labels }: Props) {
+  const theme = useTheme();
   const router = useRouter();
   const video = useRef<HTMLVideoElement>(null);
   const resumeAt = useRef(0);
@@ -85,7 +88,7 @@ export function ReplayPlayer({ src, until, title, labels }: Props) {
           resumeAt.current = e.currentTarget.currentTime;
         }}
         onError={() => setFailed(true)}
-        style={{ width: '100%', aspectRatio: '16 / 9', background: '#000', borderRadius: 6, display: 'block' }}
+        style={{ width: '100%', aspectRatio: '16 / 9', background: tok(theme).media, borderRadius: 12, display: 'block' }}
       />
     </Box>
   );

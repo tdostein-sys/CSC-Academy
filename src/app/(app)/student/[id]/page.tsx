@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { ArrowLeft, Award, ClipboardCheck, Download, ExternalLink, FileText, Link2, Lock, Mail, MessageCircle, ShieldCheck, Video } from 'lucide-react';
+import { Award, ClipboardCheck, Download, ExternalLink, FileText, Link2, Lock, Mail, MessageCircle, ShieldCheck, Video } from 'lucide-react';
 import { whatsappLink } from '@/lib/contact';
 import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
@@ -41,6 +41,8 @@ import {
 } from '@/lib/academy/types';
 import type { Locale } from '@/lib/types';
 import { formatDuration, formatSize, replayListState } from '@/lib/academy/live-shared';
+import { cameFromCatalogue, studentBreadcrumbs } from '@/lib/academy/origin';
+import { PageHeader } from '@/components/page-header';
 import { cancelMyEnrollment } from '../../academy/actions';
 import { ReplayAction } from '../replays/replay-action';
 
@@ -62,40 +64,50 @@ export default async function StudentEnrollmentPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ enrolled?: string; evaluated?: string }>;
+  searchParams: Promise<{ enrolled?: string; evaluated?: string; from?: string; course?: string }>;
 }) {
   const user = await requireUser('/student');
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   if (!UUID.test(id)) notFound();
-  const [t, ta, tc, locale, supabase] = await Promise.all([
+  const [t, ta, tc, tn, locale, supabase] = await Promise.all([
     getTranslations('student'),
     getTranslations('academy'),
     getTranslations('contact'),
+    getTranslations('nav'),
     getLocale(),
     createClient(),
   ]);
   const l = locale as Locale;
 
-  const { data } = await supabase.from('academy_enrollments').select(ENROLLMENT_COLUMNS).eq('id', id).eq('student_id', user.id).maybeSingle();
-  if (!data) notFound();
-  const e = data as Enrollment;
+  // Lectures en DEUX allers-retours au lieu de cinq : d'abord tout ce qui ne
+  // dépend que de l'inscription, puis ce qui dépend de sa session.
+  const [enrollmentRes, balRes, statesRes, paymentsRes, attemptsRes, certRes, viewsRes, replaySettingsRes, contactRes] = await Promise.all([
+    supabase.from('academy_enrollments').select(ENROLLMENT_COLUMNS).eq('id', id).eq('student_id', user.id).maybeSingle(),
+    supabase.from('academy_enrollment_balances').select('*').eq('enrollment_id', id).maybeSingle(),
+    supabase.from('academy_installment_states').select('*').eq('enrollment_id', id).order('rank'),
+    supabase.from('academy_payments').select('*').eq('enrollment_id', id).eq('status', 'confirmed').order('paid_on', { ascending: false }),
+    supabase.from('academy_evaluation_attempts').select('id, attempt_no, score, max_score, percent, passed, submitted_at').eq('enrollment_id', id).order('attempt_no'),
+    supabase.from('academy_certificates').select('*').eq('enrollment_id', id).maybeSingle(),
+    // Mes visionnages de replays en cours ou terminés (un seul par replay, hors réinitialisation).
+    supabase.from('academy_replay_views').select('recording_id, expires_at').eq('user_id', user.id).is('reset_at', null),
+    supabase.from('academy_replay_settings').select('view_hours').maybeSingle(),
+    // Contact pour le paiement : WhatsApp de CSC.
+    supabase.from('contact_settings').select('whatsapp').maybeSingle(),
+  ]);
+  if (!enrollmentRes.data) notFound();
+  const e = enrollmentRes.data as Enrollment;
 
-  const [sessionRes, balRes, statesRes, paymentsRes, meetingsRes, resourcesRes, evalRes, attemptsRes, certRes, recordingsRes] = await Promise.all([
+  const [sessionRes, meetingsRes, resourcesRes, evalRes, recordingsRes] = await Promise.all([
     supabase
       .from('academy_sessions')
       .select('label_fr, label_en, payment_instructions_fr, payment_instructions_en, trainer_name, starts_on, ends_on, academy_courses (id, title_fr, title_en)')
       .eq('id', e.session_id)
       .single(),
-    supabase.from('academy_enrollment_balances').select('*').eq('enrollment_id', id).maybeSingle(),
-    supabase.from('academy_installment_states').select('*').eq('enrollment_id', id).order('rank'),
-    supabase.from('academy_payments').select('*').eq('enrollment_id', id).eq('status', 'confirmed').order('paid_on', { ascending: false }),
     // RLS : séances et ressources ne sont renvoyées qu'aux inscrits actifs.
     supabase.from('academy_meetings').select('*').eq('session_id', e.session_id).order('starts_at'),
     supabase.from('academy_resources').select('*').eq('session_id', e.session_id).order('created_at'),
-    // Évaluation finale (hors brouillon), mes copies et mon attestation.
+    // Évaluation finale (hors brouillon).
     supabase.from('academy_evaluations').select('*').eq('session_id', e.session_id).maybeSingle(),
-    supabase.from('academy_evaluation_attempts').select('id, attempt_no, score, max_score, percent, passed, submitted_at').eq('enrollment_id', id).order('attempt_no'),
-    supabase.from('academy_certificates').select('*').eq('enrollment_id', id).maybeSingle(),
     // RLS : enregistrements prêts et non expirés, réservés aux inscrits actifs non bloqués.
     supabase.from('academy_recordings').select(RECORDING_COLUMNS).eq('session_id', e.session_id).order('started_at', { ascending: false }),
   ]);
@@ -110,18 +122,8 @@ export default async function StudentEnrollmentPage({
   const attempts = (attemptsRes.data ?? []) as Attempt[];
   const certificate = certRes.data as Certificate | null;
   const recordings = (recordingsRes.data ?? []) as Recording[];
-  // Mes visionnages en cours ou terminés (un seul par replay, hors réinitialisation).
-  const { data: viewRows } = recordings.length
-    ? await supabase
-        .from('academy_replay_views')
-        .select('recording_id, expires_at')
-        .eq('user_id', user.id)
-        .is('reset_at', null)
-        .in('recording_id', recordings.map((r) => r.id))
-    : { data: [] };
-  const myViews = new Map(((viewRows ?? []) as { recording_id: string; expires_at: string }[]).map((v) => [v.recording_id, v]));
-  const { data: replaySettings } = recordings.length ? await supabase.from('academy_replay_settings').select('view_hours').maybeSingle() : { data: null };
-  const replayHours = Number((replaySettings as { view_hours: number } | null)?.view_hours ?? 2);
+  const myViews = new Map(((viewsRes.data ?? []) as { recording_id: string; expires_at: string }[]).map((v) => [v.recording_id, v]));
+  const replayHours = Number((replaySettingsRes.data as { view_hours: number } | null)?.view_hours ?? 2);
   const replayLabels = {
     watch: t('watchReplay'),
     resume: t('replayResume'),
@@ -141,7 +143,7 @@ export default async function StudentEnrollmentPage({
   const instructions = localized(l, s.payment_instructions_fr, s.payment_instructions_en);
   const firstUnpaid = states.find((st) => st.state !== 'paid');
   // Contact pour le paiement : WhatsApp de CSC avec un message déjà écrit.
-  const { data: contact } = num(b?.remaining) > 0 ? await supabase.from('contact_settings').select('whatsapp').maybeSingle() : { data: null };
+  const contact = num(b?.remaining) > 0 ? contactRes.data : null;
   const paymentWhatsapp = whatsappLink(
     (contact as { whatsapp: string } | null)?.whatsapp,
     tc('whatsappPayment', {
@@ -155,19 +157,22 @@ export default async function StudentEnrollmentPage({
 
   return (
     <Stack spacing={6}>
-      <Box>
-        <LinkButton href="/student" size="small" startIcon={<ArrowLeft aria-hidden size={16} />} sx={{ mb: 4 }}>
-          {t('back')}
-        </LinkButton>
-        <StatusBadge tone={displayTone(display)}>{ta(`status.${display}`)}</StatusBadge>
-        <Typography variant="h5" component="h1" sx={{ mt: 2, fontWeight: 700 }}>
-          {courseTitle}
-        </Typography>
-        <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
-          {localized(l, s.label_fr, s.label_en)} · {ta('dates', { start: formatDate(s.starts_on, l), end: formatDate(s.ends_on, l) })}
-          {s.trainer_name && ` · ${ta('trainer', { name: s.trainer_name })}`}
-        </Typography>
-      </Box>
+      <PageHeader
+        breadcrumbs={studentBreadcrumbs({
+          fromCatalogue: cameFromCatalogue(sp, s.academy_courses.id),
+          courseId: s.academy_courses.id,
+          courseTitle,
+          labels: { academy: tn('academy'), catalogue: tn('tabs.catalogue'), myCourses: tn('tabs.myCourses'), mySpace: t('mySpaceCrumb') },
+        })}
+        eyebrow={<StatusBadge tone={displayTone(display)}>{ta(`status.${display}`)}</StatusBadge>}
+        title={courseTitle}
+        subtitle={
+          <>
+            {localized(l, s.label_fr, s.label_en)} · {ta('dates', { start: formatDate(s.starts_on, l), end: formatDate(s.ends_on, l) })}
+            {s.trainer_name && ` · ${ta('trainer', { name: s.trainer_name })}`}
+          </>
+        }
+      />
 
       {sp.enrolled && <Notice tone="success">{t('enrolledNotice')}</Notice>}
       {e.status === 'cancelled' && <Notice tone="info">{t('cancelledInfo')}</Notice>}

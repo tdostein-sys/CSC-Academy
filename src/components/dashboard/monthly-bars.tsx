@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import { formatNumber, formatXAF } from '@/lib/format';
 import { compactNumber } from '@/lib/dashboard/metrics';
+import { tok } from '@/@core/theme/tokens';
 import type { Locale } from '@/lib/types';
 
 /*
@@ -16,10 +17,6 @@ import type { Locale } from '@/lib/types';
  * au survol / au clavier, et tableau des valeurs pour les lecteurs d'écran.
  * Palette vérifiée (daltonisme, contraste) sur les fonds clair et sombre.
  */
-const SERIES_COLORS = {
-  light: ['#2a78d6', '#eb6834'],
-  dark: ['#3987e5', '#d95926'],
-};
 
 export interface BarSeries {
   key: string;
@@ -53,7 +50,7 @@ export function MonthlyBars({
 }) {
   const theme = useTheme();
   const uid = useId();
-  const colors = SERIES_COLORS[theme.palette.mode === 'dark' ? 'dark' : 'light'];
+  const colors = [tok(theme)['chart-1'], tok(theme)['chart-2']];
   const fmt = (v: number) => (money ? formatXAF(v, locale) : formatNumber(v, locale, 0));
   const totals = months.map((_, i) => series.reduce((a, s) => a + Math.max(0, s.values[i] ?? 0), 0));
   const max = Math.max(...totals, 0);

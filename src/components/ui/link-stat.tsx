@@ -9,7 +9,7 @@ export function LinkStat({ label, value, hint, alert = false, href }: { label: s
     <Card sx={{ height: '100%', ...(alert && { border: 1, borderColor: 'error.main' }) }}>
       <LinkCardArea href={href} sx={{ height: '100%' }}>
         <CardContent sx={{ height: '100%' }}>
-          <Typography variant="caption" component="p" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.4px', fontWeight: 600 }}>
+          <Typography variant="caption" component="p" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             {label}
           </Typography>
           <Typography variant="h4" component="p" sx={{ mt: 1, fontWeight: 700, color: alert ? 'error.main' : 'text.primary', fontSize: { xs: '1.5rem', sm: '1.875rem' } }}>

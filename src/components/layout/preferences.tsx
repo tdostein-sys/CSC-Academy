@@ -67,7 +67,7 @@ export function ThemeMenu() {
         aria-label={label}
         onClick={() => setPref(dark ? 'light' : 'dark')}
         sx={(theme) => ({
-          color: dark ? tok(theme).text : '#b45309',
+          color: dark ? tok(theme).text : tok(theme).warning,
           bgcolor: dark ? tok(theme)['surface-2'] : tok(theme)['accent-soft'],
           '&:hover': dark ? { bgcolor: tok(theme).border } : { bgcolor: tok(theme).accent, color: tok(theme)['accent-fg'] },
         })}

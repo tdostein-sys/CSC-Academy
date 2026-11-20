@@ -7,12 +7,13 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { ArrowLeft, CalendarDays, UserRound } from 'lucide-react';
+import { ArrowRight, CalendarDays, CheckCircle2, UserRound } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSessionUser } from '@/lib/auth';
 import { ActionForm } from '@/components/forms/action-form';
 import { TextField } from '@/components/forms/fields';
-import { Markdown } from '@/components/markdown';
+import { ProgramList } from '@/components/academy/program-list';
+import { PageHeader } from '@/components/page-header';
 import { StatusBadge } from '@/components/status-badge';
 import { Notice } from '@/components/ui/notice';
 import { LinkButton, TextLink } from '@/components/ui/links';
@@ -29,29 +30,27 @@ export const metadata: Metadata = { title: 'Formation' };
 export default async function CoursePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ref?: string }> }) {
   const [{ id }, { ref }] = await Promise.all([params, searchParams]);
   if (!UUID.test(id)) notFound();
-  const [t, locale, supabase, user] = await Promise.all([getTranslations('academy'), getLocale(), createClient(), getSessionUser()]);
+  const [t, tn, locale, supabase, user] = await Promise.all([getTranslations('academy'), getTranslations('nav'), getLocale(), createClient(), getSessionUser()]);
   const l = locale as Locale;
 
-  const { data } = await supabase.from('academy_courses').select(COURSE_COLUMNS).eq('id', id).maybeSingle();
-  if (!data) notFound();
-  const course = data as Course;
-
-  const [{ data: sessionsData }, { data: overviewData }, myEnrollments] = await Promise.all([
+  // Toutes les lectures en parallèle (un seul aller-retour vers la base au lieu de trois).
+  const [{ data }, { data: sessionsData }, { data: overviewData }, myEnrollments, { data: instData }] = await Promise.all([
+    supabase.from('academy_courses').select(COURSE_COLUMNS).eq('id', id).maybeSingle(),
     supabase.from('academy_sessions').select(SESSION_COLUMNS).eq('course_id', id).order('starts_on'),
     supabase.from('academy_session_overview').select('*').eq('course_id', id),
     user
       ? supabase.from('academy_enrollments').select('id, session_id').eq('student_id', user.id).neq('status', 'cancelled')
       : Promise.resolve({ data: [] as { id: string; session_id: string }[] }),
+    supabase.from('academy_installments').select('session_id, rank, amount, due_on, academy_sessions!inner(course_id)').eq('academy_sessions.course_id', id).order('rank'),
   ]);
+  if (!data) notFound();
+  const course = data as Course;
   const enrolledBySession = new Map(((myEnrollments.data ?? []) as { id: string; session_id: string }[]).map((e) => [e.session_id, e.id]));
   // Sessions affichées : ouvertes aux inscriptions, ou celles où l'utilisateur est inscrit.
   const sessions = ((sessionsData ?? []) as Session[]).filter((s) => s.enrollment_open || enrolledBySession.has(s.id));
   const overview = new Map(((overviewData ?? []) as SessionOverview[]).map((o) => [o.session_id, o]));
-
-  const { data: instData } = sessions.length
-    ? await supabase.from('academy_installments').select('*').in('session_id', sessions.map((s) => s.id)).order('rank')
-    : { data: [] };
-  const installments = (instData ?? []) as Installment[];
+  const installments = (instData ?? []) as unknown as Installment[];
+  const title = localized(l, course.title_fr, course.title_en);
 
   const profileComplete = Boolean(user && user.profile.first_name.trim() && user.profile.last_name.trim() && user.profile.phone_whatsapp.trim());
   const referral = ref && REFERRAL_CODE.test(ref.toUpperCase()) ? ref.toUpperCase() : '';
@@ -59,16 +58,16 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
 
   return (
     <Stack spacing={6}>
-      <Box>
-        <LinkButton href="/academy" size="small" startIcon={<ArrowLeft aria-hidden size={16} />} sx={{ mb: 4 }}>
-          {t('back')}
-        </LinkButton>
-        <StatusBadge tone="primary">{t(`level.${course.level}`)}</StatusBadge>
-        <Typography variant="h4" component="h1" sx={{ mt: 2, fontWeight: 700 }}>
-          {localized(l, course.title_fr, course.title_en)}
-        </Typography>
-        <Typography sx={{ mt: 2, color: 'text.secondary', maxWidth: 760 }}>{localized(l, course.summary_fr, course.summary_en)}</Typography>
-      </Box>
+      <PageHeader
+        breadcrumbs={[{ label: tn('academy'), href: '/academy' }, { label: tn('tabs.catalogue'), href: '/academy' }, { label: title }]}
+        eyebrow={<StatusBadge tone="neutral">{t(`level.${course.level}`)}</StatusBadge>}
+        title={title}
+        subtitle={
+          <Box component="span" sx={{ display: 'block', maxWidth: 760 }}>
+            {localized(l, course.summary_fr, course.summary_en)}
+          </Box>
+        }
+      />
 
       <SectionCard id="sessions-title" title={t('sessions')} subtitle={t('noRefund')}>
         {sessions.length === 0 ? (
@@ -120,9 +119,18 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
 
                     <Box sx={{ gridColumn: { md: '1 / -1' } }}>
                       {enrollmentId ? (
-                        <Notice tone="success" action={<TextLink href={`/student/${enrollmentId}`}>{t('openMySpace')}</TextLink>}>
-                          {t('alreadyEnrolled')}
-                        </Notice>
+                        <Box
+                          sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 3, p: 4, borderRadius: '12px', bgcolor: 'success.light', border: 1, borderColor: 'success.main' }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, color: 'success.main' }}>
+                            <CheckCircle2 aria-hidden size={20} />
+                            <Typography sx={{ fontWeight: 600, color: 'success.main' }}>{t('alreadyEnrolled')}</Typography>
+                          </Box>
+                          {/* Vrai bouton : l'origine (catalogue) est transmise pour un retour cohérent. */}
+                          <LinkButton href={`/student/${enrollmentId}?from=catalogue&course=${id}`} variant="contained" endIcon={<ArrowRight aria-hidden size={18} />}>
+                            {t('goToMyCourse')}
+                          </LinkButton>
+                        </Box>
                       ) : !s.enrollment_open ? (
                         <StatusBadge tone="neutral">{t('closed')}</StatusBadge>
                       ) : remaining <= 0 ? (
@@ -170,11 +178,7 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
         )}
       </SectionCard>
 
-      {program.trim() && (
-        <SectionCard id="program-title" title={t('program')}>
-          <Markdown source={program} />
-        </SectionCard>
-      )}
+      {program.trim() && <ProgramList source={program} />}
     </Stack>
   );
 }

@@ -43,7 +43,7 @@ function DeltaLine({ delta, upIsGood = true, label, locale }: { delta: number; u
 function KpiBody({ item, deltaLabel, locale }: { item: KpiItem; deltaLabel: string; locale: Locale }) {
   return (
     <CardContent sx={{ height: '100%' }}>
-      <Typography variant="caption" component="p" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.4px', fontWeight: 600 }}>
+      <Typography variant="caption" component="p" sx={{ color: 'text.secondary', fontWeight: 500 }}>
         {item.label}
       </Typography>
       <Typography variant="h5" component="p" sx={{ mt: 1, fontWeight: 700, color: item.alert ? 'error.main' : 'text.primary', fontSize: { xs: '1.25rem', sm: '1.5rem' }, overflowWrap: 'anywhere' }}>

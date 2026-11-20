@@ -70,7 +70,7 @@ export async function QuestionForm({ sessionId, locale, question }: { sessionId:
                     type="checkbox"
                     name={`correct_${n}`}
                     defaultChecked={Boolean(c?.correct)}
-                    sx={{ width: 18, height: 18, accentColor: 'var(--mui-palette-success-main, #15803d)' }}
+                    sx={{ width: 18, height: 18, accentColor: (t) => t.palette.success.main }}
                   />
                   <span>{t('correct')}</span>
                 </Box>

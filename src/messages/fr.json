@@ -39,7 +39,7 @@
     "academy": "Academy",
     "consulting": "Consulting",
     "ga": "Gestion d'actifs",
-    "dashboard": "Mon espace",
+    "dashboard": "Vue d’ensemble",
     "notifications": "Notifications",
     "profile": "Mon profil",
     "admin": "Administration",
@@ -50,7 +50,27 @@
     "student": "Mes formations",
     "contact": "Contact",
     "appointments": "Mes rendez-vous",
-    "consultations": "Consultations"
+    "consultations": "Consultations",
+    "overview": "Vue d’ensemble",
+    "myActivities": "Mes activités",
+    "ourActivities": "Nos activités",
+    "account": "Compte",
+    "profileSecurity": "Profil & sécurité",
+    "unreadSuffix": "non lues",
+    "tabs": {
+      "catalogue": "Catalogue",
+      "myCourses": "Mes formations",
+      "offers": "Offres",
+      "myAppointments": "Mes rendez-vous",
+      "consultations": "Consultations"
+    },
+    "help": {
+      "title": "Besoin d’aide ?",
+      "hours": "Lun–sam, 8 h–18 h (heure du Cameroun)",
+      "whatsapp": "Écrire sur WhatsApp",
+      "whatsappMessage": "Bonjour CSC, j’ai une question.",
+      "contactPage": "Page contact"
+    }
   },
   "home": {
     "heroTitle": "Apprendre, investir et grandir avec CSC",
@@ -269,7 +289,10 @@
         "wow": "Surpris",
         "party": "Bravo"
       }
-    }
+    },
+    "goToMyCourse": "Accéder à ma formation",
+    "programChapters": "{count, plural, one {# chapitre} other {# chapitres}}",
+    "programChapterLabel": "Chapitre {n} :"
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -895,7 +918,9 @@
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
     "userMenu": "Menu utilisateur",
-    "skipToContent": "Aller au contenu"
+    "skipToContent": "Aller au contenu",
+    "loadingPage": "Chargement de la page…",
+    "breadcrumb": "Fil d’Ariane"
   },
   "student": {
     "title": "Mes formations",
@@ -994,7 +1019,8 @@
     "replayRetry": "Relancer la lecture",
     "replayProtection": "Ce replay est réservé aux inscrits de la formation : merci de ne pas le diffuser.",
     "payWhatsapp": "Payer via WhatsApp",
-    "payContact": "Envoyer un message à CSC"
+    "payContact": "Envoyer un message à CSC",
+    "mySpaceCrumb": "Mon espace formation"
   },
   "adminAcademy": {
     "saved": "Modifications enregistrées.",
@@ -1037,11 +1063,12 @@
       "summary": "Résumé",
       "summaryHint": "Une ou deux phrases affichées dans le catalogue.",
       "program": "Programme",
-      "programHint": "Mise en forme simple : « ## Titre », « - élément ».",
+      "programHint": "Un chapitre par ligne, avec sa durée : « Chapitre 1 : Introduction aux cryptomonnaies – 1 h » ou « 1. Introduction – 1 h 30 ». Le programme s’affiche alors en liste numérotée avec la durée totale.",
       "level": "Niveau",
       "create": "Créer la formation",
       "createTitle": "Nouvelle formation",
-      "createHint": "Décrivez la formation. Vous ajouterez ensuite une ou plusieurs sessions (dates, places, prix)."
+      "createHint": "Décrivez la formation. Vous ajouterez ensuite une ou plusieurs sessions (dates, places, prix).",
+      "titleHint": "Écrivez le titre en minuscules, avec une majuscule au début seulement. Ex. : « Écosystème crypto & utilisation de Binance »."
     },
     "course": {
       "back": "Formations",
